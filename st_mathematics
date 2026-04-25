@@ -1,0 +1,4476 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage{tocloft}
+\setlength{\cftbeforesecskip}{2pt}%space before each section entry
+\setlength{\cftbeforesubsecskip}{0pt}%pace before subsection entry
+\setlength{\cftbeforesubsubsecskip}{0pt}%space before subsubsection entry
+% -- Page layout --
+\usepackage[margin=1in]{geometry}
+\setlength{\emergencystretch}{3em}
+\hbadness=3000
+\hfuzz=3pt
+% -- Math packages --
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{mathtools}
+\mathtoolsset{showonlyrefs}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{comment}
+\lstset{
+  language=Python,
+  basicstyle=\ttfamily\scriptsize,
+  keywordstyle=\color{blue!70!black},
+  commentstyle=\color{green!40!black},
+  stringstyle=\color{red!60!black},
+  showstringspaces=false,
+  breaklines=true,
+  breakatwhitespace=true,
+  columns=fullflexible,
+  frame=single,
+  keepspaces=true
+}
+%--Theorems--
+\usepackage{amsthm}
+\theoremstyle{plain}
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{corollary}[theorem]{Corollary}
+\theoremstyle{definition}
+\newtheorem{definition}[theorem]{Definition}
+\theoremstyle{remark}
+\newtheorem{remark}[theorem]{Remark}
+
+\numberwithin{equation}{section}
+
+% -- Other utilities --
+\usepackage{bm}
+\usepackage{enumitem}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{setspace}
+\usepackage{fancyhdr}
+\usepackage{lastpage}
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{0.75\baselineskip}
+
+% -- Hyperlinks (load late) --
+\usepackage{hyperref}
+
+% -- Custom commands --
+% Disable \boxed{...} (remove boxes around formulas)
+\renewcommand{\boxed}[1]{#1}
+
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\dd}{\,\mathrm{d}}
+\newcommand{\1}{\mathbf{1}}
+\newcommand{\tr}{\mathrm{tr}}
+\newcommand{\diag}{\mathrm{diag}}
+\newcommand{\norm}[1]{\left\lVert #1\right\rVert}
+\newcommand{\abs}[1]{\left\lvert #1\right\rvert}
+
+\setlength{\headheight}{15pt}
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\nouppercase{\leftmark}}
+\fancyhead[R]{\thepage\,/\pageref{LastPage}}
+\renewcommand{\headrulewidth}{0.4pt}
+\fancypagestyle{plain}{%
+  \fancyhf{}
+  \fancyhead[L]{\nouppercase{\leftmark}}
+  \fancyhead[R]{\thepage\,/\pageref{LastPage}}
+  \renewcommand{\headrulewidth}{0.4pt}
+}
+
+\makeatletter
+\renewcommand{\sectionmark}[1]{\markboth{\thesection.\ #1}{}}
+\makeatother
+
+
+\begin{document}
+
+\hypersetup{pageanchor=false}
+\begin{titlepage}
+\centering
+
+
+{\Large \textsc{American University in Bulgaria}\par}
+
+\vspace{0.8cm}
+
+{\normalsize Department of Mathematics\par}
+% or another department name if needed
+
+\vspace{0.3cm}
+
+{\Huge \bfseries Nonlinear Extensions of the Black-Scholes Equation \par}
+
+\vspace{0.4cm}
+
+{\Large \textit{A Semilinear Heat Equation Framework for Multi Asset Option Pricing}\par}
+
+\vspace{1.2cm}
+
+\IfFileExists{cover_image.png}{%
+\includegraphics[width=0.5\textwidth]{cover_image.png}%
+}{%
+\fbox{\parbox[c][0.18\textheight][c]{0.5\textwidth}{\centering Cover image placeholder}}%
+}
+
+\vspace{0.8cm}
+
+{\large
+Prepared For Bachelor Thesis By\par
+Mihail Aleksandrov\par
+}
+
+\vspace{0.6cm}
+
+{\large
+Advisor\par
+Mirko Tarulli\par
+}
+
+\vfill
+
+{\large
+March 2026\par
+}
+
+\end{titlepage}
+
+\clearpage
+\hypersetup{pageanchor=true}
+\markboth{Abstract}{}
+
+\begin{abstract}
+We study a nonlinear extension of the multi-asset Black-Scholes equation, which incorporates a state dependant valuation adjustments, such as funding and credit cost. Using a sequance of transformations we reduce the pricing problem to a semilinear heat equation.
+
+\[
+\partial_\tau u - \Delta u + f(u) = 0, \qquad (\tau,z)\in \mathbb{R}_+ \times \mathbb{R}^d.
+\]
+We focus our analysis on two piecewise-linear nonlinearities, which are meant to encode discounting on positive and negative mark-to-market values. Under a global Lipshitz condition, we establish global well-posedness and instantaneous $H^1$ regularization. In the dissipative case, we further obtain energy identities, $L^2$ contraction, and algebraic decay. In contrast, the non-dissipative model admits only Gronwall-type growth bounds together with exponentially weighted Gagliardo--Nirenberg estimates, highlighting the competition between funding effects and risk-free discounting. Finally, these analytical results are transported back to the original Black-Scholes variables.
+
+\end{abstract}
+\clearpage
+
+\begingroup
+\setstretch{1.5}
+\setlength{\parskip}{0pt}
+\tableofcontents
+\endgroup
+
+\clearpage
+\section{Introduction}
+\label{sec:intro}
+Derivative contracts are fundamental to the functioning of the modern financial market and the economy as a whole. They are used in almost every sector of the economy, along the entire supply chain, to hedge risk associated with interest rate/exchange rate fluctuations and input cost prices, such as petrol and gas, and to insure assets. More generally, a derivative is a contract between parties for the exchange of fixing some sort of financial terms ahead of time. This raises the question of how one is supposed to price these contracts. How much does the risk for the party exposed—like the issuer of a call option, for example-cost, and what is a fair compensation for that risk?
+
+The foundational theory of derivatives pricing comes from \cite{BlackScholes1973} and \cite{Merton1973}. They established that no-arbitrage pricing leads to a parabolic partial differential equation. At the core of their model is the idea that assets follow a geometric Brownian motion. Their approach argues that under the no-arbitrage condition, the price of a financial derivative should be the price of replicating a locally riskless portfolio, where by hedging you isolate the volatile ups and downs. And since it is riskless, you should be earning the market-wide risk-free rate. This approach yields an elegant linear pricing equation, which can also be easily extended to a multi-asset setting. Even though the underlying mathematics becomes more tricky since we are dealing with correlated Brownian motion, the core argument of constructing a replicating portfolio is the same.
+
+The classical model is analytically powerful precisely because it removes many market frictions: volatility is constant, liquidity is perfect, transaction costs are absent, and borrowing and lending occur at a single risk-free rate. For this paper, the last simplification is the most relevant. In practice, deposits and credit do not generate symmetric funding costs. This simple economic asymmetry has a strong effect on the pricing formula, since it breaks the linearity of the classical Black-Scholes equation.
+
+This asymmetry in discounting costs has motivated the \emph{total value} approach to derivatives pricing. One of the early contributions to nonlinear derivatives pricing is \cite{BurgardKjaer2011}, who showed that when a bank cannot borrow and deposit at the risk-free rate, linearity breaks down because the valuation adjustment depends recursively on the unknown price. They therefore extend the linear Black--Scholes equation by introducing a nonlinear funding term. Since many contracts can be viewed as insurance written against a broader portfolio of assets, we follow a similar modeling philosophy and generalize the framework to $d>1$ underlying assets.
+
+We are thus led to the nonlinear multi-asset pricing equation
+\begin{equation}
+V_t
++ \frac{1}{2}\sum_{i,j=1}^d Q_{ij}S_iS_j V_{S_iS_j}
++ r\sum_{i=1}^d S_i V_{S_i}
+- rV
+- g(V) = 0,
+\label{eq:intro_nonlin_bs}
+\end{equation}
+with terminal condition $V(T,S)=\Phi(S)$. Here $Q$ is a symmetric
+positive definite covariance matrix, and the nonlinear term $g(V)$
+represents a state-dependent valuation adjustment capturing the
+asymmetry between borrowing and lending rates.
+
+A prototypical specification is
+\[
+g(v) = a\,v^+ - b\,v^-, \qquad a,b \ge 0,
+\]
+which applies different effective discounting rates to positive and
+negative exposures. For example, a positive exposure (an asset) may be
+funded at a lower rate $a$, while a negative exposure (a liability) incurs
+a higher funding cost $b$, reflecting real market conditions.
+
+We also consider an alternative model
+\[
+g(v) = a\,v^+ + b\,v^-, \qquad a,b \ge 0.
+\]
+
+Notice that in this model the positive branch has the same behavior as
+the previous one, but on the negative exposure branch it actually
+amplifies the rate. Mathematically speaking, this creates a
+non-dissipative behavior. Economically speaking, this can be interpreted
+as a benefit associated with holding liabilities. For example, one not
+only receives funding, which can be invested, but also effectively
+discounts the contract against its own default risk. In this sense, we
+adjust the price of the contract to reflect that negative exposures might
+generate effective benefits.
+
+The aim of this paper is to establish a rigorous analytical framework for these two nonlinear valuation problems. Due to the intrinsic difference in their respective behaviors, we separate the analysis of the
+dissipative and non-dissipative models. For both models jointly we
+establish well-posedness in weighted $L^2$ spaces and derive smoothing
+results under Lipschitz and piecewise-linear assumptions. For the
+dissipative core model $f_-(u)=a u^+ - b u^-$ we additionally establish
+comparison, contraction, and decay properties. The non-dissipative
+extension $f_+(u)=a u^+ + b u^-$ is treated separately using bounds
+adapted to the lack of monotonicity.
+
+\begin{remark}[Sign convention under time reversal]
+\label{rem:sign_convention}
+Throughout this thesis, we pass from the financial pricing PDE, which is
+posed backward in time, to a forward parabolic heat-type equation. To do
+this we use a change of variables, time reversal, and discounting. Under
+this transformation the nonlinear term $g(V)$ changes sign and becomes a
+reaction term of the form $+f(u)$ in the forward equation.
+\end{remark}
+
+\medskip
+\noindent\textbf{Main results.}
+The principal results of this paper are as follows.
+\begin{enumerate}[label=(\roman*)]
+
+\item \emph{Global $L^2$ well-posedness}. Under the global Lipschitz condition, the equation has a unique global mild solution $\tilde u\in C([0,\infty);L^2(\mathbb{R}^d))$ with continuous dependence on the initial datum; see Theorem~\ref{thm:L2_global_wp}. For the pricing PDE, this means that the contract price depends continuously on the payoff.
+
+\item \emph{Parabolic smoothing and $H^1$ well-posedness}
+(Section~\ref{subsec:H1_instantaneous_regularization},
+Theorem~\ref{thm:H1_piecewise_wp}).
+For $L^2$ initial data, the solution exhibits instantaneous parabolic
+smoothing for all $\tau>0$, and for $H^1$ initial data it remains
+globally in $C([0,\infty);H^1(\mathbb{R}^d))$. This means that the
+pricing function becomes smooth immediately and remains well-behaved.
+
+\item \emph{Dissipative model: contraction and decay}
+(Section~\ref{sec:dissipative_model}).
+For $f_-(u)=au^+-bu^-$, the sign condition $f_-(s)s\ge 0$ yields an
+$L^2$ energy identity and contraction, together with algebraic decay
+\[
+  \|\tilde u(\tau)\|_{L^2}^2
+  \lesssim \|\tilde u_0\|_{L^1}^2\,\tau^{-d/2}, \qquad \tau\to\infty,
+\]
+for $\tilde u_0\in L^1(\mathbb{R}^d)\cap L^2(\mathbb{R}^d)$.
+After back-translation,
+\[
+\|V(t)\|_{L^2_\omega}\lesssim
+e^{-r(T-t)}\|\Phi\|_{L^1_\omega}(T-t)^{-d/4}.
+\]
+
+\item \emph{Non-dissipative plus-model bounds}
+(Section~\ref{sec:plus_model}).
+For $f_+(u)=au^++bu^-$, dissipativity is lost and no contraction holds.
+Instead, we obtain the Gr\"onwall bound
+\[
+\|\tilde u(\tau)\|_{L^2}^2
+\le e^{2b\tau}\|\tilde u_0\|_{L^2}^2,
+\]
+together with an exponentially weighted Gagliardo--Nirenberg estimate.
+After back-translation,
+\[
+\|V(t)\|_{L^2_\omega}\lesssim
+e^{-(r-b)(T-t)}\|\Phi\|_{L^1_\omega}(T-t)^{-d/4},
+\]
+so that decay occurs only when $r>b$.
+
+\end{enumerate}
+
+\medskip
+\noindent\textbf{Outline of the thesis.}
+In Section~\ref{sec:background} we recall the fundamental theory of the
+Black--Scholes framework. Then in Section~\ref{sec:nonlinear} we
+introduce the nonlinear models. In Section~\ref{sec:transform} we
+transform the pricing PDE to a semilinear heat equation. Subsequently,
+in Sections~\ref{sec:transform}, \ref{sec:dissipative_model}, and
+\ref{sec:plus_model}, we carry out the analysis. Finally, we transport
+the results back to the pricing PDE in
+Section~\ref{sec:nonlinear_bs_proofs}.
+\part*{Part I - Financial Model and Transformations}
+\addcontentsline{toc}{part}{Part I -- Financial Model and Transformations}
+
+\section{Financial and Mathematical Background}
+\label{sec:background}
+
+The most important question, in the world of financial derivatives is what is their "fair price". How do you go ahead about pricing the random ups and downs that financial assets have. To answer this question we recall the classical Black-Scholes theory, upon which we will later build our semi-linear multi-asset model. 
+
+\subsection{European options and the underlying price model}
+
+A European option is a contract giving its holder the right, but not the obligation, to buy or sell an underlying asset at a fixed strike price \(K\) on a future date \(T\). If \(S_t\) denotes the asset price at time \(t\), then the standard payoffs at maturity are
+\[
+C(S,T)=(S-K)^+,
+\qquad
+P(S,T)=(K-S)^+,
+\]
+for a call and a put, respectively.
+
+In the classical Black-Scholes model, the underlying asset is assumed to follow a geometric Brownian motion,
+\begin{equation}
+\label{eq:physicalSDE}
+\frac{dS_t}{S_t}=\mu\,dt+\sigma\,dW_t,
+\end{equation}
+where \(\mu\in\mathbb R\) is the drift, \(\sigma>0\) is the volatility, and \(W_t\) is a standard Brownian motion. Under this model, \(S_t\) is lognormally distributed.
+
+\subsection{The Black-Scholes equation}
+
+Let \(V=V(S,t)\) denote the option price. Applying It\^o's formula to \(V(S_t,t)\), where \(S_t\) satisfies \eqref{eq:physicalSDE}, gives
+\begin{equation}
+\label{eq:dV}
+dV
+=
+\Bigl(V_t+\mu S V_S+\tfrac12 \sigma^2 S^2 V_{SS}\Bigr)\,dt
++\sigma S V_S\,dW_t.
+\end{equation}
+
+To eliminate the stochastic term, one considers the self-financing portfolio
+\[
+\Pi=V-\Delta S.
+\]
+Choosing \(\Delta=V_S\) removes the stochastic component and makes the portfolio locally riskless. By the no-arbitrage principle, such a portfolio must grow at the risk-free rate \(r\), so \(d\Pi=r\Pi\,dt\). This yields the Black-Scholes equation
+\begin{equation}
+\label{eq:BlackScholes}
+V_t+\tfrac12 \sigma^2 S^2 V_{SS}+rSV_S-rV=0.
+\end{equation}
+
+Thus the option price satisfies a linear backward parabolic partial differential equation with terminal condition
+\[
+V(T,S)=\Phi(S).
+\]
+
+\paragraph{Risk-neutral valuation and probabilistic interpretation.}
+The above derivation is equivalent to a probabilistic pricing principle under a risk-neutral measure $\mathbb{Q}$. Under $\mathbb{Q}$, the asset dynamics become
+\[
+\frac{dS_t}{S_t} = r\,dt + \sigma\,dW_t^{\mathbb{Q}},
+\]
+and the arbitrage-free price of a European payoff $\Phi$ is given by
+\begin{equation}
+\label{eq:FK_BS}
+V(t,S)
+=
+e^{-r(T-t)}\,\mathbb{E}^{\mathbb{Q}}\!\bigl[\Phi(S_T)\mid S_t=S\bigr].
+\end{equation}
+Here \(\mathbb{E}^{\mathbb{Q}}[\cdot\mid S_t=S]\) denotes conditional expectation under the risk-neutral probability measure \(\mathbb{Q}\), that is, expectation with respect to the law under which discounted asset prices are martingales; Wilmott \cite{Wilmott2006}.
+
+
+
+The Black-Scholes equation \eqref{eq:BlackScholes} is the deterministic counterpart of this representation. In particular, solving the PDE with terminal condition is equivalent to evaluating the conditional expectation \eqref{eq:FK_BS}.
+
+\subsection{Multi-asset extension}
+To generalize the model for more than one variable, as in the case of the "basket option" we need to consider not only the individual volatility of one underlying asset, but also weather or not the basket constituents tend to comove. 
+
+Let us consider a vector of asset prices
+$S_t = (S_t^1,\dots,S_t^d)$ satisfying
+\begin{equation}
+\label{eq:multi_asset_SDE}
+\frac{dS_t^i}{S_t^i}
+=
+\mu_i\,dt + \sum_{j=1}^d \sigma_{ij}\,dW_t^j,
+\qquad i=1,\dots,d,
+\end{equation}
+where $\Sigma=(\sigma_{ij})$ is the volatility matrix and $W_t$ is a
+$d$-dimensional Brownian motion. The matrix $\Sigma$ encodes both the
+individual volatilities and the interactions between assets, while the
+covariance matrix
+\[
+Q = \Sigma \Sigma^\top
+\]
+captures their joint dynamics.
+
+Applying the vector-valued It\^o formula to $V(S_t,t)$ yields
+\[
+dV
+=
+\Bigl(
+V_t + \sum_{i=1}^d \mu_i S_i V_{S_i}
++ \tfrac12 \sum_{i,j=1}^d Q_{ij} S_i S_j V_{S_i S_j}
+\Bigr) dt
++ \text{stochastic terms}.
+\]
+
+Constructing a self-financing portfolio with position
+$\Delta = \nabla_S V$ eliminates all stochastic components
+simultaneously, provided the covariance matrix $Q$ is non-degenerate.
+Imposing the no-arbitrage condition then leads to the multi-asset
+Black--Scholes equation
+\begin{equation}
+\label{eq:BS_multi}
+V_t
++
+\frac12 \sum_{i,j=1}^d Q_{ij} S_i S_j V_{S_i S_j}
++
+r \sum_{i=1}^d S_i V_{S_i}
+-
+rV
+= 0.
+\end{equation}
+
+\subsection{Connection with the heat equation}
+
+This subsection treats the single-asset case as a warm-up illustrating the transformation mechanism. The full $d$-dimensional reduction, involving covariance structure and whitening, is carried out in Section~\ref{sec:transform}.
+
+Introduce
+\begin{equation}
+\label{eq:BS}
+x=\log\!\left(\frac{S}{K}\right),
+\qquad
+\tau=\frac12 \sigma^2 (T-t),
+\qquad
+V(S,t)=K\,w(x,\tau).
+\end{equation}
+A direct computation gives
+\[
+w_\tau=w_{xx}+(k-1)w_x-kw,
+\qquad
+k=\frac{2r}{\sigma^2}.
+\]
+The first-order and zeroth-order terms are removed by the substitution
+\[
+w(x,\tau)=e^{-\frac12 (k-1)x-\frac14 (k+1)^2\tau}\,v(x,\tau),
+\]
+which reduces the equation to the heat equation
+\[
+v_\tau=v_{xx}.
+\]
+
+This shows that the Black-Scholes pricing problem is mathematically equivalent to a diffusion problem in logarithmic price variables. 
+
+\begin{remark}[Well-posedness via the heat equation]
+The transformation above converts the Black-Scholes terminal-value problem into an initial-value problem for the heat equation. Since the heat equation is well-posed in standard function spaces, existence, uniqueness, and stability follow immediately and are inherited by $V$ through the inverse transformation. This mechanism will be extended in Section~\ref{sec:transform} to treat the nonlinear multi-asset model.
+\end{remark}
+
+\subsection{Classical pricing formula}
+
+For a European call, the previous analysis leads to the classical Black-Scholes formula.
+
+\begin{corollary}[Black-Scholes call price formula \cite{BlackScholes1973,Merton1973}]
+\label{cor:BS_formula}
+For a European call with payoff \(V(T,S)=(S-K)^+\), the solution of \eqref{eq:BlackScholes} is
+\begin{equation}
+\label{eq:BS_call}
+C(S,t)=S\,N(d_1)-Ke^{-r(T-t)}N(d_2),
+\end{equation}
+where
+\[
+d_1=\frac{\ln(S/K)+(r+\frac12\sigma^2)(T-t)}{\sigma\sqrt{T-t}},
+\qquad
+d_2=d_1-\sigma\sqrt{T-t},
+\]
+and $N$ is the standard normal cumulative distribution function.
+\end{corollary}
+
+We do not pursue the classical linear theory further, since the main goal of the thesis is to study a nonlinear multi-asset extension in which the Black-Scholes operator acquires an additional semilinear term reflecting a reduced-form asymmetric valuation adjustment.
+
+\section{Limitations of the classical model and motivation for an extension}
+\label{sec:nonlinear}
+
+
+Nonlinear extensions of the Black-Scholes model have become more and more popular in the financial literature since they address some limitations and shortcomings of the standard model. For example the classical BS model fails to take into account several important factors which create friction in the real world. For example, the model assumes a universal risk free rate. This assumption fails to take into account differences in the rates between credits and deposits, as well as counterparty risk. We attempt to model these frictions by adding a nonlinear reaction term $-g(V)$ to the pricing PDE. This serves the purpose of encoding FVA and XVA adjustments. This is economically meaningful since it provides more realistic modelling of the market. We consider the nonlinearities of the form
+\[
+g(v)=a\,v^+ \pm b\,v^-, \qquad a,b \ge 0,
+\]
+where $v^+=\max(v,0)$ and $v^-=\max(-v,0)$. 
+
+This structure reflects the asymmetry between positive and negative exposures. Lets first consider the 
+\[
+g(v)=a\,v^+ - b\,v^-, \qquad a,b \ge 0.
+\]
+This structure allows us to control the bid-ask spread between credit and deposit and provides a more realistic view of the financial reality. But also mathematically speaking these adjustments break the linearity of the pricing PDE, since they create recursive dependence since the desk must post or receive collateral in amounts dependent on the current mark-to-market value. From a mathematical perspective, the resulting equation is dissipative.
+
+Considering the second term
+\[
+g(v)=a\,v^+ + b\,v^-, \qquad a,b \ge 0.
+\]
+Notice that when we have positive exposure the model behaves exactly as the abovementioned dissipative model. But when we have negative exposure we see that the term is discounted less strongly. TThis means that it attempts to model funding benefit effects such as an institution's own counterparty risk.
+
+This structure can be understood as a reduced form of XVA and should be viewed as a stylized approximation rather than a full model of default. A complete XVA model would include default rates and exposure at default, which is out of the scope of the current work. Rather we look at it as an interesting mathematical case with some economic meaning.
+
+\subsection{Market setting (classical part)}
+Let $S=(S_1,\dots,S_d)\in(0,\infty)^d$ denote the vector of underlying asset prices.
+In the standard risk-neutral Black-Scholes setting with constant covariance matrix $Q\in\mathbb{R}^{d\times d}$
+(symmetric, positive definite), the second-order term in the pricing PDE is
+\begin{equation}
+\frac12\sum_{i,j=1}^d Q_{ij} S_iS_j\,\partial_{S_iS_j}V
+\label{eq:bs-diffusion}
+\end{equation}
+The first-order term is $r\sum_i S_i \partial_{S_i}V$ and the linear discount term is $-rV$.
+
+\subsection{Semilinear valuation adjustment}
+
+We now extend the classical pricing equation by adding a semilinear reaction term depending only on the current mark-to-market value. This modification makes the adjustment endogenous while preserving the parabolic structure of the Black-Scholes equation. Let us start by considering the backward terminal-value problem
+\begin{equation}
+\begin{aligned}
+V_t
+&+\frac12\sum_{i,j=1}^d Q_{ij} S_i S_j\, V_{S_iS_j}
++ r\sum_{i=1}^d S_i\, V_{S_i}
+- rV
+- g(V)\\
+&=0,\qquad 0\le t<T.
+\end{aligned}
+\label{eq:nonlinearBS}
+\end{equation}
+with terminal condition $V(T,S)=\Phi(S)$.
+
+\subsection{The model nonlinearities}
+The core dissipative model uses the piecewise-linear specification
+\begin{equation}
+g_-(v) = a\,v^{+} - b\,v^{-}, \qquad a,b \ge 0,
+\label{eq:g_piecewise_linear}
+\end{equation}
+while the non-dissipative extension uses
+\begin{equation}
+g_+(v) = a\,v^{+} + b\,v^{-}, \qquad a,b \ge 0.
+\label{eq:g_plus_piecewise_linear}
+\end{equation}
+Both are globally Lipschitz and positively homogeneous of degree~$1$, so both lead to a time-independent semilinear heat equation after the transformations of Section~\ref{sec:transform}. Their analytical properties are separated later: dissipativity is introduced only for $g_-$ in Section~\ref{sec:dissipative_model}, while $g_+$ is treated in Section~\ref{sec:plus_model}.
+
+\subsection{Assumptions on the nonlinear term \texorpdfstring{$g$}{g}}
+
+The following assumptions are the only ones used before the dissipative and non-dissipative models are considered:
+\begin{equation}
+g:\mathbb{R}\to\mathbb{R},\qquad g(0)=0,
+\label{eq:g_shared_zero}
+\end{equation}
+and
+\begin{equation}
+g \text{ is globally Lipschitz.}
+\label{eq:g_Lipschitz}
+\end{equation}
+For the piecewise-linear models above, positive homogeneity of degree~$1$ is also used to make the transformed heat equation autonomous. 
+
+\newpage
+
+\section{Transformations to a semilinear heat equation}
+\label{sec:transform}
+
+We reduce the nonlinear Black--Scholes equation~\eqref{eq:nonlinearBS}
+to a semilinear heat equation via four successive changes of variables,
+each detailed in a dedicated subsection below.
+\subsection{Time-to-maturity and discounting}
+\label{sec:discount}
+
+We set $\tau=T-t$, so we can tranform the backwards pricing problem into a forward parabolic equation. We also introduce a discounted unknown, which removes the zeroth-order discounting term $U(\tau,S)$. These are standard steps in
+the analysis of Black--Scholes-type equations; see, for example,
+\cite[Ch.~4]{WilmottHowisonDewynne1995}.
+
+Let $\tau=T-t$ (so $\tau\in(0,\infty)$) and define the discounted unknown
+\[
+U(\tau,S):=e^{r\tau}V(T-\tau,S)=e^{r(T-t)}V(t,S).
+\]
+We compute the derivatives of \(V\) in terms of \(U\).
+
+\medskip
+\noindent\textbf{Time derivative.}
+Since \(\tau=T-t\), we have
+\[
+\frac{d\tau}{dt}=-1.
+\]
+Using the chain rule,
+\begin{align*}
+V_t(t,S)
+&=
+\frac{\partial}{\partial t}\bigl(e^{-r\tau}U(\tau,S)\bigr)\\
+&=
+\frac{\partial}{\partial \tau}\bigl(e^{-r\tau}U(\tau,S)\bigr)\cdot \frac{d\tau}{dt}\\
+&=
+\bigl(-r e^{-r\tau}U+e^{-r\tau}U_\tau\bigr)(-1)\\
+&=
+e^{-r\tau}(rU-U_\tau).
+\end{align*}
+Therefore
+\begin{equation}
+\boxed{
+V_t=e^{-r\tau}(rU-U_\tau).
+}
+\label{eq:Vt_from_U}
+\end{equation}
+
+\medskip
+\noindent\textbf{Spatial derivatives.}
+Since the factor \(e^{-r\tau}\) does not depend on \(S\),
+\[
+V_{S_i}=e^{-r\tau}U_{S_i},
+\qquad
+V_{S_iS_j}=e^{-r\tau}U_{S_iS_j}.
+\]
+Hence
+\begin{equation}
+\boxed{
+V_{S_i}=e^{-r\tau}U_{S_i},
+\qquad
+V_{S_iS_j}=e^{-r\tau}U_{S_iS_j}.
+}
+\label{eq:spatial_from_U}
+\end{equation}
+
+\medskip
+\noindent\textbf{Substitution into the Black-Scholes equation.}
+Suppose \(V\) solves
+\[
+V_t+\frac12\sum_{i,j=1}^d Q_{ij}S_iS_jV_{S_iS_j}
++r\sum_{i=1}^d S_iV_{S_i}
+-rV
+-g(V)=0,
+\]
+or more generally \eqref{eq:nonlinearBS}. Substituting \eqref{eq:Vt_from_U} and \eqref{eq:spatial_from_U}, and multiplying by \(e^{r\tau}\), we obtain
+\[
+rU-U_\tau
++\frac12\sum_{i,j=1}^d Q_{ij}S_iS_jU_{S_iS_j}
++r\sum_{i=1}^d S_iU_{S_i}
+-rU
+-e^{r\tau}g(e^{-r\tau}U)=0.
+\]
+The \(rU\) terms cancel, yielding
+\[
+-U_\tau
++\frac12\sum_{i,j=1}^d Q_{ij}S_iS_jU_{S_iS_j}
++r\sum_{i=1}^d S_iU_{S_i}
+-e^{r\tau}g(e^{-r\tau}U)=0.
+\]
+Therefore
+\begin{equation}
+\boxed{
+U_\tau
+=
+\frac12\sum_{i,j=1}^d Q_{ij}S_iS_jU_{S_iS_j}
++r\sum_{i=1}^d S_iU_{S_i}
+-f(\tau,U),
+}
+\label{eq:Ueq}
+\end{equation}
+where
+\begin{equation}
+\boxed{
+f(\tau,y):=e^{r\tau}g(e^{-r\tau}y).
+}
+\label{eq:f_def_discount}
+\end{equation}
+
+
+
+
+\subsection{Log-price variables}
+Next, we introduce logarithmic asset-price variables,variables which turn the Euler-type operators \(S_i\partial_{S_i}\) into ordinary derivatives \(\partial_{x_i}\). The scalar case is trated in in \cite[Ch.~5]{WilmottHowisonDewynne1995}, while the multi-dimensional case appears, for instance, in \cite[Ch.~8]{MusielaRutkowski2005}.
+
+
+Let
+\[
+x_i=\ln S_i,\qquad S_i=e^{x_i},\qquad S=e^x,
+\]
+and define
+\[
+w(\tau,x):=U(\tau,e^x),\qquad x\in\R^d.
+\]
+We now compute explicitly how the spatial derivatives transform.
+
+\medskip
+\noindent\textbf{First derivatives.}
+For each \(i=1,\dots,d\), since \(S_k=e^{x_k}\), one has
+\[
+\frac{\partial S_k}{\partial x_i}
+=
+\begin{cases}
+S_i,& k=i,\\
+0,& k\neq i.
+\end{cases}
+\]
+Hence, by the chain rule,
+\[
+w_{x_i}(\tau,x)
+=
+\sum_{k=1}^d U_{S_k}(\tau,e^x)\,\frac{\partial S_k}{\partial x_i}
+=
+U_{S_i}(\tau,e^x)\,S_i.
+\]
+Therefore
+\begin{equation}
+\boxed{
+w_{x_i}=S_i\,U_{S_i}.
+}
+\label{eq:first_log_derivative}
+\end{equation}
+Equivalently,
+\[
+S_i\partial_{S_i}=\partial_{x_i}.
+\]
+
+\medskip
+\noindent\textbf{Second derivatives: off-diagonal case \(i\neq j\).}
+Starting from \eqref{eq:first_log_derivative},
+\[
+w_{x_i}=S_iU_{S_i},
+\]
+differentiate with respect to \(x_j\), \(j\neq i\). Since \(S_i\) does not depend on \(x_j\),
+\[
+w_{x_ix_j}
+=
+\partial_{x_j}(S_iU_{S_i})
+=
+S_i\,\partial_{x_j}(U_{S_i}).
+\]
+Again by the chain rule,
+\[
+\partial_{x_j}(U_{S_i})
+=
+\sum_{k=1}^d U_{S_iS_k}\frac{\partial S_k}{\partial x_j}
+=
+U_{S_iS_j}S_j.
+\]
+Thus
+\begin{equation}
+\boxed{
+w_{x_ix_j}=S_iS_j\,U_{S_iS_j},
+\qquad i\neq j.
+}
+\label{eq:offdiag_log}
+\end{equation}
+
+\medskip
+\noindent\textbf{Second derivatives: diagonal case \(i=j\).}
+Differentiate \eqref{eq:first_log_derivative} with respect to \(x_i\):
+\[
+w_{x_ix_i}
+=
+\partial_{x_i}(S_iU_{S_i})
+=
+(\partial_{x_i}S_i)\,U_{S_i}
++
+S_i\,\partial_{x_i}(U_{S_i}).
+\]
+Since \(\partial_{x_i}S_i=S_i\), and
+\[
+\partial_{x_i}(U_{S_i})
+=
+\sum_{k=1}^d U_{S_iS_k}\frac{\partial S_k}{\partial x_i}
+=
+U_{S_iS_i}S_i,
+\]
+we obtain
+\[
+w_{x_ix_i}
+=
+S_iU_{S_i}+S_i^2U_{S_iS_i}.
+\]
+Using again \eqref{eq:first_log_derivative}, this becomes
+\begin{equation}
+\boxed{
+w_{x_ix_i}=w_{x_i}+S_i^2U_{S_iS_i}.
+}
+\label{eq:diag_log_pre}
+\end{equation}
+Hence
+\begin{equation}
+\boxed{
+S_i^2U_{S_iS_i}=w_{x_ix_i}-w_{x_i}.
+}
+\label{eq:diag_log}
+\end{equation}
+
+\medskip
+\noindent\textbf{Summary of the transformed operators.}
+From \eqref{eq:offdiag_log} and \eqref{eq:diag_log}, we have
+\[
+S_iS_j\partial_{S_iS_j}
+=
+\begin{cases}
+\partial_{x_ix_j},& i\neq j,\\[1mm]
+\partial_{x_ix_i}-\partial_{x_i},& i=j.
+\end{cases}
+\]
+Therefore
+\begin{align}
+\frac12\sum_{i,j=1}^d Q_{ij}S_iS_jU_{S_iS_j}
+&=
+\frac12\sum_{i\neq j}Q_{ij}w_{x_ix_j}
++\frac12\sum_{i=1}^d Q_{ii}(w_{x_ix_i}-w_{x_i})\nonumber\\
+&=
+\frac12\sum_{i,j=1}^d Q_{ij}w_{x_ix_j}
+-\frac12\sum_{i=1}^d Q_{ii}w_{x_i}\nonumber\\
+&=
+\boxed{
+\frac12\,\tr(QD_x^2w)-\frac12\sum_{i=1}^d Q_{ii}w_{x_i}.
+}
+\label{eq:2ndorderlog_detailed}
+\end{align}
+Here \(D_x^2w\) denotes the Hessian matrix of \(w\) with respect to \(x\).
+
+\medskip
+\noindent\textbf{The first-order Black-Scholes term.}
+From \eqref{eq:first_log_derivative},
+\[
+r\sum_{i=1}^d S_iU_{S_i}
+=
+r\sum_{i=1}^d w_{x_i}
+=
+r\,\mathbf 1\cdot \nabla_x w,
+\]
+where \(\mathbf 1=(1,\dots,1)\in\R^d\).
+
+\medskip
+\noindent\textbf{Resulting equation in log-variables.}
+Substituting \eqref{eq:2ndorderlog_detailed} into \eqref{eq:Ueq}, we obtain
+\begin{align*}
+w_\tau
+&=
+\frac12\,\tr(QD_x^2w)
+-\frac12\sum_{i=1}^d Q_{ii}w_{x_i}
++r\sum_{i=1}^d w_{x_i}
+-f(\tau,w)\\
+&=
+\frac12\,\tr(QD_x^2w)
++\sum_{i=1}^d \Bigl(r-\frac12Q_{ii}\Bigr)w_{x_i}
+-f(\tau,w).
+\end{align*}
+Hence
+\begin{equation}
+\boxed{
+w_\tau=\frac12\,\tr(QD_x^2w)+\beta\cdot\nabla_x w-f(\tau,w),
+}
+\label{eq:weq}
+\end{equation}
+where the constant drift vector \(\beta\in\R^d\) is given by
+\[
+\beta_i:=r-\frac12Q_{ii},
+\qquad i=1,\dots,d.
+\]
+
+This shows that the logarithmic change of variables transforms the Euler
+operators \(S_i\partial_{S_i}\) into the flat derivatives
+\(\partial_{x_i}\), and converts the variable-coefficient Black-Scholes
+diffusion into a constant-coefficient second-order operator in the
+log-price variables.
+
+
+
+
+
+
+
+
+\subsection{Remove transport by a moving frame}
+
+Notice that after the logarithmic transformation a constant drift term remains.
+
+\begin{equation}
+w_\tau=\frac12\,\tr(QD_x^2w)+\beta\cdot\nabla_x w-f(\tau,w),
+\qquad (\tau,x)\in\R_+\times\R^d,
+\label{eq:weq_movingframe_start}
+\end{equation}
+where
+\[
+\beta=(\beta_1,\dots,\beta_d)\in\R^d,
+\qquad
+\beta_i=r-\frac12Q_{ii}.
+\]
+
+We now remove the first-order transport term by passing to a moving frame. Define
+\[
+u(\tau,y):=w(\tau,y-\beta\tau),
+\qquad y\in\R^d.
+\]
+Equivalently, if we set
+\[
+x=y-\beta\tau,
+\]
+then
+\[
+u(\tau,y)=w(\tau,x).
+\]
+
+\medskip
+\noindent\textbf{Step 1: time derivative.}
+Since \(x=y-\beta\tau\), we have
+\[
+\frac{\partial x_i}{\partial\tau}=-\beta_i,
+\qquad i=1,\dots,d.
+\]
+Applying the chain rule,
+\[
+u_\tau(\tau,y)
+=
+w_\tau(\tau,x)
++\sum_{i=1}^d w_{x_i}(\tau,x)\,\frac{\partial x_i}{\partial\tau}.
+\]
+Hence
+\begin{equation}
+\boxed{
+u_\tau(\tau,y)=w_\tau(\tau,x)-\beta\cdot\nabla_x w(\tau,x).
+}
+\label{eq:u_tau_movingframe}
+\end{equation}
+
+\medskip
+\noindent\textbf{Step 2: first spatial derivatives.}
+Fix \(k\in\{1,\dots,d\}\). Since
+\[
+x_i=y_i-\beta_i\tau,
+\]
+we have
+\[
+\frac{\partial x_i}{\partial y_k}=\delta_{ik},
+\]
+where \(\delta_{ik}\) is the Kronecker symbol. Therefore
+\[
+u_{y_k}(\tau,y)
+=
+\sum_{i=1}^d w_{x_i}(\tau,x)\,\frac{\partial x_i}{\partial y_k}
+=
+w_{x_k}(\tau,x).
+\]
+Thus
+\begin{equation}
+\boxed{
+\nabla_y u(\tau,y)=\nabla_x w(\tau,x).
+}
+\label{eq:grad_movingframe}
+\end{equation}
+
+\medskip
+\noindent\textbf{Step 3: second spatial derivatives.}
+Differentiating once more with respect to \(y_\ell\), we get
+\[
+u_{y_\ell y_k}(\tau,y)
+=
+\partial_{y_\ell}\bigl(w_{x_k}(\tau,x)\bigr)
+=
+\sum_{i=1}^d w_{x_ix_k}(\tau,x)\,\frac{\partial x_i}{\partial y_\ell}.
+\]
+Since \(\partial x_i/\partial y_\ell=\delta_{i\ell}\),
+\[
+u_{y_\ell y_k}(\tau,y)=w_{x_\ell x_k}(\tau,x).
+\]
+Hence
+\begin{equation}
+\boxed{
+D_y^2u(\tau,y)=D_x^2w(\tau,x).
+}
+\label{eq:hessian_movingframe}
+\end{equation}
+
+\medskip
+\noindent\textbf{Step 4: substitute into the equation.}
+Using \eqref{eq:u_tau_movingframe}, \eqref{eq:grad_movingframe}, and \eqref{eq:hessian_movingframe}, equation \eqref{eq:weq_movingframe_start} gives
+\begin{align*}
+u_\tau(\tau,y)
+&=
+w_\tau(\tau,x)-\beta\cdot\nabla_x w(\tau,x)\\
+&=
+\left(\frac12\,\tr(QD_x^2w)+\beta\cdot\nabla_x w-f(\tau,w)\right)(\tau,x)
+-\beta\cdot\nabla_x w(\tau,x)\\
+&=
+\frac12\,\tr(QD_x^2w)(\tau,x)-f(\tau,w(\tau,x)).
+\end{align*}
+Since \(D_x^2w(\tau,x)=D_y^2u(\tau,y)\) and \(w(\tau,x)=u(\tau,y)\), we conclude
+\begin{equation}
+\boxed{
+u_\tau(\tau,y)=\frac12\,\tr(QD_y^2u(\tau,y))-f(\tau,u(\tau,y)).
+}
+\label{eq:ueq_movingframe_detailed}
+\end{equation}
+
+Thus the transport term \(\beta\cdot\nabla w\) has been completely removed.
+
+\medskip
+\noindent\textbf{Interpretation.}
+The substitution
+\[
+u(\tau,y)=w(\tau,y-\beta\tau)
+\]
+corresponds to observing the solution in a frame moving with constant velocity \(\beta\). In this moving frame, the first-order drift disappears, and the equation reduces to a pure anisotropic diffusion with reaction term:
+\[
+u_\tau=\frac12\,\tr(QD_y^2u)-f(\tau,u).
+\]
+This is the natural form to which one applies the final linear change of variables that reduces the diffusion matrix to the identity.
+
+
+
+\subsection{Reduction to the Laplacian}
+Since the assets can be correlated, the diffusion matrix $Q$, which contains
+variances and covariances, generally has nonzero off-diagonal entries. This
+implies that the associated second-order operator involves mixed derivatives
+and that the diffusion is anisotropic. As a result, the evolution stretches
+and rotates the space.
+
+To remove these correlations and recover isotropic diffusion, we apply a
+Cholesky factorization of $Q$. This allows us to work in transformed
+coordinates in which the diffusion matrix becomes the identity and the
+operator reduces to the Laplacian.
+
+Proposition~\ref{prop:cholesky_spd}
+provides an invertible matrix $L$ such that
+\[
+LL^\top=\frac12\,Q
+\quad\text{(e.g.\ Cholesky factorization).}
+\]
+Here $y$ denotes the intermediate log-price variable and $z$ the new
+whitened variable. Let $y=Lz$ and define
+$\tilde u(\tau,z):=u(\tau,Lz)$.
+Then a standard linear change of variables gives
+\[
+\frac12\,\tr(QD^2_y u)=\Delta_z \tilde u.
+\]
+We verify this identity explicitly. Let \(y=Lz\) and define
+\[
+\tilde u(\tau,z):=u(\tau,Lz),\qquad z\in\R^d.
+\]
+We compute the derivatives of \(\tilde u\) with respect to \(z\).
+
+For each \(k=1,\dots,d\), the chain rule gives
+\[
+\partial_{z_k}\tilde u(\tau,z)
+=
+\sum_{i=1}^d \partial_{y_i}u(\tau,Lz)\,\partial_{z_k}(Lz)_i.
+\]
+Since
+\[
+(Lz)_i=\sum_{m=1}^d L_{im}z_m,
+\]
+we have \(\partial_{z_k}(Lz)_i=L_{ik}\), hence
+\[
+\partial_{z_k}\tilde u(\tau,z)
+=
+\sum_{i=1}^d L_{ik}\,\partial_{y_i}u(\tau,Lz).
+\]
+In vector form,
+\[
+\nabla_z\tilde u(\tau,z)=L^\top \nabla_y u(\tau,Lz).
+\]
+Differentiating once more with respect to \(z_\ell\), we find
+\[
+\partial_{z_\ell z_k}\tilde u(\tau,z)
+=
+\sum_{i=1}^d L_{ik}\,\partial_{z_\ell}\big(\partial_{y_i}u(\tau,Lz)\big).
+\]
+Applying the chain rule again,
+\[
+\partial_{z_\ell}\big(\partial_{y_i}u(\tau,Lz)\big)
+=
+\sum_{j=1}^d \partial_{y_jy_i}u(\tau,Lz)\,\partial_{z_\ell}(Lz)_j
+=
+\sum_{j=1}^d L_{j\ell}\,\partial_{y_jy_i}u(\tau,Lz).
+\]
+Therefore
+\[
+\partial_{z_\ell z_k}\tilde u(\tau,z)
+=
+\sum_{i,j=1}^d L_{ik}L_{j\ell}\,\partial_{y_iy_j}u(\tau,Lz).
+\]
+Thus the Hessian transforms according to
+\[
+D_z^2\tilde u(\tau,z)
+=
+L^\top \big(D_y^2u(\tau,Lz)\big)L.
+\]
+
+Taking the trace, we obtain
+\[
+\Delta_z\tilde u(\tau,z)
+=
+\tr\!\big(D_z^2\tilde u(\tau,z)\big)
+=
+\tr\!\Big(L^\top \big(D_y^2u(\tau,Lz)\big)L\Big).
+\]
+Using the cyclicity of the trace,
+\[
+\Delta_z\tilde u(\tau,z)
+=
+\tr\!\Big((LL^\top)\,D_y^2u(\tau,Lz)\Big).
+\]
+If \(L\) is chosen so that
+\[
+LL^\top=\frac12\,Q,
+\]
+then
+\[
+\Delta_z\tilde u(\tau,z)
+=
+\tr\!\Big(\frac12\,Q\,D_y^2u(\tau,Lz)\Big)
+=
+\frac12\,\tr\!\big(QD_y^2u(\tau,Lz)\big).
+\]
+Hence
+\[
+\boxed{
+\frac12\,\tr(QD_y^2u)(\tau,Lz)=\Delta_z\tilde u(\tau,z).
+}
+\]
+Substituting this into
+\[
+u_\tau=\frac12\,\tr(QD_y^2u)-f(\tau,u),
+\]
+we arrive at
+\[
+\partial_\tau \tilde u-\Delta_z\tilde u+f(\tau,\tilde u)=0.
+\]
+
+Therefore \eqref{eq:ueq_movingframe_detailed} becomes
+\begin{equation}
+\begin{aligned}
+\partial_\tau \tilde u - \Delta \tilde u + f(\tau,\tilde u) &= 0,
+\qquad (\tau,z)\in\R_+\times\R^d,\\
+f(\tau,y) &= e^{r\tau}\,g(e^{-r\tau}y).
+\end{aligned}
+\label{eq:semilinearheat_general}
+\end{equation}
+In the positively homogeneous degree-$1$ case (notably $g(v)=a v^+ - b v^-$), one has $f(\tau,\cdot)\equiv g(\cdot)$,
+so \eqref{eq:semilinearheat_general} reduces to the \emph{time-independent} semilinear heat equation
+\begin{equation}
+\boxed{
+\partial_\tau \tilde u - \Delta \tilde u + f(\tilde u)=0\quad\text{on }\R_+\times\R^d,
+}
+\label{eq:semilinearheat_reduction}
+\end{equation}
+with $f=g$.
+
+The Cholesky factorization $LL^\top = \tfrac{1}{2}Q$
+diagonalises the diffusion to the standard Laplacian
+$\Delta_z$, so the subsequent semilinear theory may be stated in
+whitened variables without further reference to the covariance structure
+of the original model.
+
+
+\subsection{Summary of the full transformation}
+The preceding subsections can be summarized as a single dictionary between pricing variables and heat variables. Starting from $(t,S)$ and $V(t,S)$, define:
+\begin{align*}
+\tau &= T-t,\\
+U(\tau,S) &= e^{r\tau}V(T-\tau,S),\\
+x &= \ln S, \qquad w(\tau,x)=U(\tau,e^x),\\
+u(\tau,y) &= w(\tau,y-\beta\tau),\qquad \beta_i=r-\tfrac12Q_{ii},\\
+\tilde u(\tau,z) &= u(\tau,Lz), \qquad y=Lz, \qquad LL^\top=\tfrac12 Q.
+\end{align*}
+Then $\tilde u$ solves the semilinear heat Cauchy problem
+\eqref{eq:semilinearheat} (introduced and studied in
+Section~\ref{sec:shared_theory}).
+
+We have thus reduced the original pricing problem \eqref{eq:nonlinearBS} to the Cauchy problem.
+
+\part*{Part II - Analysis of the Semilinear Problem}
+\addcontentsline{toc}{part}{Part II -- Analysis of the Semilinear Problem}
+
+\section{Semilinear Theory}
+\label{sec:shared_theory}
+
+The transformation in Section~\ref{sec:transform} reduces the pricing problem to a semilinear heat equation. Before using any sign structure, we record the results that depend only on the Lipschitz and piecewise-linear framework. 
+
+We work with the semilinear heat equation on $\R^d$
+\begin{equation}
+\boxed{
+\partial_\tau \tilde u - \Delta \tilde u + f(\tilde u)=0,
+\qquad (\tau,z)\in(0,\infty)\times\R^d,
+}
+\label{eq:semilinearheat}
+\end{equation}
+supplemented with the Cauchy datum $\tilde u(0,z)=\tilde u_0(z)$.
+
+\subsection{Assumptions on the nonlinearities}
+\label{subsec:f_assumptions}
+
+We consider, at this point, the piecewise-linear models with the truncation structure
+\begin{equation}
+f_-(u)=a u^+-b u^-,\qquad
+f_+(u)=a u^+ + b u^-,
+\qquad a,b\ge 0.
+\label{eq:f_piecewise_shared}
+\end{equation}
+
+We underline again that they are globally Lipschitz.
+
+
+
+\subsection{Heat semigroup bounds and parabolic smoothing}
+\label{subsec:semigroup_smoothing}
+
+Let $S(\tau):=e^{\tau\Delta}$, defined via Fourier multiplier $e^{-\tau|\xi|^2}$, denote the heat semigroup on $\R^d$.
+The following standard estimates are the analytic engine behind the shared theory: diffusion improves integrability and differentiability immediately for positive time. They will be used repeatedly in the mild-solution and smoothing arguments.
+
+\begin{lemma}[$L^p$-$L^q$ smoothing for the heat semigroup]
+\label{lem:heat_LpLq}
+For $1\le p\le q\le\infty$ and $\tau>0$,
+\begin{equation}
+\|S(\tau)\varphi\|_{L^q(\R^d)}
+\le C_{d,p,q}\,\tau^{-\frac d2(\frac1p-\frac1q)}\,\|\varphi\|_{L^p(\R^d)}.
+\label{eq:heat_LpLq}
+\end{equation}
+Moreover, for $\tau>0$,
+\begin{equation}
+\|\nabla S(\tau)\varphi\|_{L^q(\R^d)}
+\le C_{d,p,q}\,\tau^{-\frac12-\frac d2(\frac1p-\frac1q)}\,\|\varphi\|_{L^p(\R^d)}.
+\label{eq:heat_grad_LpLq}
+\end{equation}
+In particular, the sharp endpoint $p=1$, $q=\infty$ reads
+\begin{equation}
+\boxed{
+\|S(\tau)\varphi\|_{L^\infty(\R^d)}
+\le (4\pi\tau)^{-d/2}\,\|\varphi\|_{L^1(\R^d)},
+\qquad \tau>0.
+}
+\label{eq:heat_L1_Linf}
+\end{equation}
+\end{lemma}
+
+\begin{proof}
+Consider
+$$
+S(\tau)\varphi=\int_{\R^d} G_\tau(x-z)\varphi(z)\,dz,
+$$
+with the Gaussian kernel
+$G_\tau(z)=(4\pi\tau)^{-d/2}e^{-|z|^2/(4\tau)}$, one has
+$\|G_\tau\|_{L^r}=C_{d,r}\,\tau^{-\frac d2(1-1/r)}$ for $1\le r\le\infty$.
+Indeed, for $1\le r<\infty$ a change of variables $z=\sqrt{\tau}\,y$ gives
+\[
+\|G_\tau\|_{L^r}^r
+=(4\pi\tau)^{-dr/2}\int_{\R^d} e^{-r|z|^2/(4\tau)}\,dz
+=C_{d,r}\,\tau^{-\frac{dr}{2}+\frac d2},
+\]
+and taking the $r$th root yields the claimed exponent. The case $r=\infty$
+is immediate from $\|G_\tau\|_{\infty}=(4\pi\tau)^{-d/2}$.
+
+Now fix $1\le p\le q\le\infty$ and define $r\in[1,\infty]$ by
+\[
+\frac1r=1+\frac1q-\frac1p.
+\]
+Since $p\le q$, one has $0\le 1/r\le 1$, so this choice is admissible, and
+equivalently
+\[
+1+\frac1q=\frac1p+\frac1r,
+\qquad
+1-\frac1r=\frac1p-\frac1q.
+\]
+Therefore Young's convolution inequality gives
+\[
+\|S(\tau)\varphi\|_{L^q}
+=\|G_\tau*\varphi\|_{L^q}
+\le \|G_\tau\|_{L^r}\,\|\varphi\|_{L^p}
+\le C_{d,p,q}\,\tau^{-\frac d2(\frac1p-\frac1q)}\,\|\varphi\|_{L^p},
+\]
+which proves \eqref{eq:heat_LpLq}.
+
+For the gradient estimate, note that
+\[
+\nabla G_\tau(z)=-\frac{z}{2\tau}G_\tau(z).
+\]
+Hence the same scaling argument gives
+\[
+\|\nabla G_\tau\|_{L^r}
+\le C_{d,r}\,\tau^{-1/2-\frac d2(1-1/r)}.
+\]
+Applying Young's inequality once more,
+\[
+\|\nabla S(\tau)\varphi\|_{L^q}
+=\|(\nabla G_\tau)*\varphi\|_{L^q}
+\le \|\nabla G_\tau\|_{L^r}\,\|\varphi\|_{L^p}
+\le C_{d,p,q}\,\tau^{-\frac12-\frac d2(\frac1p-\frac1q)}\,\|\varphi\|_{L^p},
+\]
+which is \eqref{eq:heat_grad_LpLq}.
+
+Finally, the sharp endpoint $p=1$, $q=\infty$ corresponds to $r=\infty$, so
+\[
+\|S(\tau)\varphi\|_{L^\infty}
+\le \|G_\tau\|_{L^\infty}\,\|\varphi\|_{L^1}
+=(4\pi\tau)^{-d/2}\,\|\varphi\|_{L^1},
+\]
+which is exactly \eqref{eq:heat_L1_Linf}. Since $G_\tau\ge 0$ and
+$\int_{\R^d} G_\tau\,dz=1$, this representation also shows that $S(\tau)$
+preserves nonnegativity.
+\end{proof}
+
+\subsection{Instantaneous \texorpdfstring{$H^1$}{H1} regularization and energy class data}
+\label{subsec:H1_instantaneous_regularization}
+
+We now separate two different facts:
+\begin{itemize}[leftmargin=2em]
+\item[(i)] if $\tilde u_0\in L^2(\R^d)$, then the parabolic semigroup regularizes instantly and
+$\tilde u(\tau)\in H^1(\R^d)$ for every $\tau>0$;
+\item[(ii)] if one wants an $H^1$ energy identity starting exactly from $\tau=0$, then one must assume
+$\tilde u_0\in H^1(\R^d)$.
+\end{itemize}
+The point is that a mere mild $L^2$ solution only satisfies $\tilde u\in C([0,T];L^2)$, so the formal pairings
+$\big(\partial_\tau \tilde u,\tilde u\big)_{L^2}$ and $\big(-\Delta \tilde u,\tilde u\big)_{L^2}$ are not a priori meaningful at
+$\tau=0$. On the other hand, the heat semigroup immediately improves regularity for every positive time.
+
+\paragraph{Step 1: instantaneous $H^1$ regularization from $L^2$ data.}
+Assume first only $\tilde u_0\in L^2(\R^d)$ and let $\tilde u$ be the mild solution of
+\eqref{eq:semilinearheat}, i.e.
+\begin{equation}
+\tilde u(\tau)=S(\tau)\tilde u_0-\int_0^\tau S(\tau-s)f(\tilde u(s))\,ds,
+\qquad S(\tau)=e^{\tau\Delta}.
+\label{eq:duhamel_H1}
+\end{equation}
+We claim that for every $\tau>0$,
+\begin{equation}
+\|\nabla \tilde u(\tau)\|_{L^2}
+\le C\,\tau^{-1/2}\|\tilde u_0\|_{L^2}
++ C\int_0^\tau (\tau-s)^{-1/2}\,\|f(\tilde u(s))\|_{L^2}\,ds.
+\label{eq:H1_smoothing_mild}
+\end{equation}
+This is the precise form of the ``$L^2\to H^1$ smoothing'' used throughout the paper.
+
+To prove \eqref{eq:H1_smoothing_mild}, differentiate \eqref{eq:duhamel_H1} in space:
+\[
+\nabla \tilde u(\tau)=\nabla S(\tau)\tilde u_0-\int_0^\tau \nabla S(\tau-s)f(\tilde u(s))\,ds.
+\]
+Hence, by the triangle inequality in $L^2$,
+\[
+\|\nabla \tilde u(\tau)\|_{L^2}
+\le \|\nabla S(\tau)\tilde u_0\|_{L^2}
++ \int_0^\tau \|\nabla S(\tau-s)f(\tilde u(s))\|_{L^2}\,ds.
+\]
+It remains to estimate the gradient of the heat semigroup on $L^2$. We use \eqref{eq:heat_grad_LpLq}, giving a direct proof in the particular case $p=q=2$. Using Fourier variables,
+\[
+\widehat{S(\tau)\phi}(\xi)=e^{-\tau|\xi|^2}\,\widehat\phi(\xi),
+\]
+so
+\[
+\|\nabla S(\tau)\phi\|_{L^2}^2
+= \int_{\R^d}|\xi|^2 e^{-2\tau|\xi|^2}|\widehat\phi(\xi)|^2\,d\xi.
+\]
+Since the scalar function $y\mapsto y e^{-2y}$ is bounded on $[0,\infty)$, there exists $C>0$ such that
+$|\xi|^2 e^{-2\tau|\xi|^2}\le C\tau^{-1}$ for all $\xi$ and all $\tau>0$. Therefore
+\[
+\|\nabla S(\tau)\phi\|_{L^2}^2\le C\tau^{-1}\|\phi\|_{L^2}^2,
+\qquad\text{i.e.}\qquad
+\|\nabla S(\tau)\phi\|_{L^2}\le C\tau^{-1/2}\|\phi\|_{L^2}.
+\]
+Applying this estimate with $\phi=\tilde u_0$ and then with $\phi=f(\tilde u(s))$ gives \eqref{eq:H1_smoothing_mild}.
+In particular, for every fixed $\varepsilon>0$,
+\begin{equation}
+\sup_{\tau\in[\varepsilon,T]}\|\nabla \tilde u(\tau)\|_{L^2}<\infty,
+\label{eq:H1_eps_bound}
+\end{equation}
+provided the right-hand side of \eqref{eq:H1_smoothing_mild} is finite.
+
+When $f$ is globally Lipschitz and $f(0)=0$, one has
+\[
+|f(r)|\le L|r|\qquad(r\in\R),
+\]
+for some Lipschitz constant $L$. Moreover, if one assumes that $\|\tilde u(s)\|_{L^2}\le \varphi(s)\|\tilde u_0\|_{L^2},$ 
+\begin{equation}
+\|f(\tilde u(s))\|_{L^2}\le L\|\tilde u(s)\|_{L^2}\le \varphi(s)L\|\tilde u_0\|_{L^2}
+\label{eq:L2_forcing_bound}
+\end{equation}
+ Inserting \eqref{eq:L2_forcing_bound} into \eqref{eq:H1_smoothing_mild} yields
+\begin{align}
+\|\nabla \tilde u(\tau)\|_{L^2}
+&\le C\tau^{-1/2}\|\tilde u_0\|_{L^2}
+ + CL\|\tilde u_0\|_{L^2}\int_0^\tau (\tau-s)^{-1/2}\varphi(s)\,ds, \quad 0<\tau\le T.
+\label{eq:H1_smoothing_explicit}
+\end{align}
+if $(\tau-s)^{-1/2}\varphi(s)\in L^1((0,\infty))$. Hence the solution belongs to $H^1(\R^d)$ for every positive time, even when the initial datum is only in $L^2$.
+What one cannot conclude from \eqref{eq:H1_smoothing_explicit} is continuity into $H^1$ at $\tau=0$: indeed, the term
+$\tau^{-1/2}\|\tilde u_0\|_{L^2}$ blows up as $\tau\downarrow0$. This is why an $H^1$ estimate starting at the initial time
+requires stronger data.
+
+
+
+
+\paragraph{Motivation for \texorpdfstring{$H^1$}{H1} initial data.}
+We now give an argument explaining why the assumption
+\(\tilde{u}_0 \in H^1(\mathbb{R}^d)\) is needed to propagate the
+\(H^1\) estimate all the way to \(\tau=0\), rather than only for \(\tau>0\).
+The rigorous statement and proof are given in
+Theorem~\ref{thm:H1_piecewise_wp} below.
+One assumes in addition
+\begin{equation}
+\tilde u_0\in H^1(\R^d).
+\label{eq:H1_initial_data}
+\end{equation}
+Indeed, if \(S(\tau)=e^{\tau\Delta}\) denotes the heat semigroup, then
+\[
+\widehat{S(\tau)\tilde u_0}(\xi)=e^{-\tau|\xi|^2}\widehat{\tilde u_0}(\xi),
+\]
+and therefore
+\[
+\|S(\tau)\tilde u_0-\tilde u_0\|_{H^1(\R^d)}^2
+=
+\int_{\R^d}(1+|\xi|^2)\,
+|e^{-\tau|\xi|^2}-1|^2\,|\widehat{\tilde u_0}(\xi)|^2\,d\xi.
+\]
+Since \(e^{-\tau|\xi|^2}\to 1\) pointwise as \(\tau\downarrow0\), and
+\[
+|e^{-\tau|\xi|^2}-1|^2\le 4,
+\]
+the integrand is dominated by
+\[
+4(1+|\xi|^2)|\widehat{\tilde u_0}(\xi)|^2,
+\]
+which is integrable because \(\tilde u_0\in H^1(\R^d)\). Hence, by a convergence argument,
+\begin{equation}
+S(\tau)\tilde u_0\to \tilde u_0
+\qquad\text{strongly in }H^1(\R^d)
+\quad\text{as }\tau\downarrow 0.
+\label{eq:H1_strong_continuity}
+\end{equation}
+
+Now write the mild solution in Duhamel form:
+\[
+\tilde u(\tau)
+=
+S(\tau)\tilde u_0
+-
+\int_0^\tau S(\tau-s)f(\tilde u(s))\,ds.
+\]
+Since the heat semigroup is bounded on \(H^1(\R^d)\), we have
+\[
+\left\|
+\int_0^\tau S(\tau-s)f(\tilde u(s))\,ds
+\right\|_{H^1}
+\le
+\int_0^\tau \|f(\tilde u(s))\|_{H^1}\,ds.
+\]
+If \(f\) is Lipschitz on \(H^1\), then
+\[
+\|f(\tilde u(s))\|_{H^1}\le C\,\|\tilde u(s)\|_{H^1},
+\]
+and if \(\tilde u\in C([0,T];H^1(\R^d))\), the right-hand side tends to \(0\) as \(\tau\downarrow0\). Therefore
+\[
+\tilde u(\tau)\to \tilde u_0
+\qquad\text{in }H^1(\R^d)
+\quad\text{as }\tau\downarrow0.
+\]
+The fixed-point argument of Theorem~\ref{thm:H1_piecewise_wp}
+below makes this rigorous.
+
+
+
+
+
+
+
+
+\begin{remark}[Interpretation for rough data]
+If only $\tilde u_0\in L^2(\R^d)$ is assumed, then the $H^1$ energy identity from the $H^1$ theory need not make sense at the initial time,
+but \eqref{eq:H1_smoothing_mild} still shows that $\tilde u(\tau)\in H^1(\R^d)$ for every $\tau>0$. Equivalently,
+for every $\varepsilon>0$ one may perform the $H^1$ energy method on $[\varepsilon,T]$ and then let $\varepsilon\downarrow0$
+only at the level of inequalities. After transport back to Black-Scholes variables, this means that an $L^2_\omega$ payoff gives
+instant weighted $H^1_\omega$ regularization of the discounted solution $U$ for every positive backward time.
+\end{remark}
+
+
+
+\begin{remark}[Endpoint smoothing for mild solutions]
+\label{rem:duhamel_Linf}
+Let $\tilde u$ be a mild solution of \eqref{eq:semilinearheat}, i.e.
+\[
+\tilde u(\tau)=S(\tau)\tilde u_0-\int_0^\tau S(\tau-s)\,f(\tilde u(s))\,ds.
+\]
+Applying \eqref{eq:heat_L1_Linf} yields, for every $\tau>0$,
+\begin{equation}
+\|\tilde u(\tau)\|_{L^\infty}
+\le (4\pi\tau)^{-d/2}\,\|\tilde u_0\|_{L^1}
++\int_0^\tau (4\pi(\tau-s))^{-d/2}\,\|f(\tilde u(s))\|_{L^1}\,ds,
+\label{eq:duhamel_Linf_bound}
+\end{equation}
+which upgrades $L^1$ information into pointwise control for $\tau>0$.
+Combining \eqref{eq:heat_LpLq}-\eqref{eq:heat_grad_LpLq} with the Duhamel formula similarly yields
+instantaneous smoothing in Sobolev spaces for $\tau>0$.
+\end{remark}
+
+\subsection{Well-posedness in \texorpdfstring{$L^2$}{L2} for globally Lipschitz \texorpdfstring{$f$}{f}}
+\label{subsec:mild_wp}
+
+Assume $f$ is globally Lipschitz. Let $S(\tau)=e^{\tau\Delta}$ be the heat semigroup on $L^2(\R^d)$.
+A \emph{mild solution} of \eqref{eq:semilinearheat} is a function
+$\tilde u\in C([0,\infty);L^2)$ satisfying the Duhamel formula
+\begin{equation}
+\tilde u(\tau)=S(\tau)\tilde u_0 - \int_0^\tau S(\tau-s)\,f(\tilde u(s))\,ds.
+\label{eq:duhamel}
+\end{equation}
+
+\begin{theorem}[Global well-posedness in $L^2$ (globally Lipschitz case)]
+\label{thm:L2_global_wp}
+Assume $f$ is globally Lipschitz. For each $\tilde u_0\in L^2(\R^d)$ there exists a unique global mild solution $\tilde u\in C([0,\infty);L^2(\R^d))$ of \eqref{eq:semilinearheat}. Moreover, on every bounded time interval the solution depends Lipschitz continuously on the initial datum.
+\end{theorem}
+
+\begin{proof}
+Let $L_f$ be a global Lipschitz constant for $f$, so that
+\[
+|f(\xi)-f(\eta)|\le L_f |\xi-\eta|
+\qquad\text{for all }\xi,\eta\in\R.
+\]
+Since $f$ is globally Lipschitz, it has at most linear growth:
+\[
+|f(\xi)|\le |f(0)|+L_f|\xi|,
+\qquad \xi\in\R.
+\]
+Hence for every $u\in L^2(\R^d)$ we, since we have $f(0)=0$, so
+\begin{equation}
+\|f(u)\|_{L^2}\le L_f\|u\|_{L^2}.
+\label{eq:f_L2_bound}
+\end{equation}
+We now fix $T>0$ and work on the Banach space
+\[
+X_T:=C([0,T];L^2(\R^d)),
+\qquad
+\|u\|_{X_T}:=\sup_{0\le \tau\le T}\|u(\tau)\|_{L^2}.
+\]
+
+Define the mapping $\mathcal T:X_T\to X_T$ by
+\begin{equation}
+(\mathcal Tu)(\tau)
+:=
+S(\tau)\tilde u_0-\int_0^\tau S(\tau-s)\,f(u(s))\,ds,
+\qquad 0\le \tau\le T.
+\label{eq:fixed_point_map}
+\end{equation}
+We show in several steps that $\mathcal T$ has a unique fixed point.
+
+\medskip
+\noindent\textbf{Step 1: \(\mathcal T\) is well defined on \(X_T\).}
+Let $u\in X_T$. Since $u\in C([0,T];L^2)$ and $f$ is globally Lipschitz, the map
+\[
+s\longmapsto f(u(s))
+\]
+belongs to $C([0,T];L^2)$. Indeed,
+\[
+\|f(u(s))-f(u(s'))\|_{L^2}\le L_f\|u(s)-u(s')\|_{L^2} \to 0
+\qquad\text{as }s'\to s.
+\]
+The heat semigroup satisfies
+\[
+\|S(t)\|_{L^2}\le \|u_0\|_{L^2},
+\qquad t\ge 0.
+\]
+Therefore the map
+\[
+\tau\longmapsto \int_0^\tau S(\tau-s)\,f(u(s))\,ds
+\]
+is continuous as an $L^2$-valued function on $[0,T]$. Since $\tau\mapsto S(\tau)\tilde u_0$ is also continuous in $L^2$, it follows that $\mathcal Tu\in X_T$.
+
+\medskip
+\noindent\textbf{Step 2: contraction estimate.}
+Let $u,v\in X_T$. Using the definition \eqref{eq:fixed_point_map}, the semigroup bound, and the Lipschitz property of $f$, we obtain for each $\tau\in[0,T]$:
+\begin{align*}
+\|(\mathcal Tu)(\tau)-(\mathcal Tv)(\tau)\|_{L^2}
+&=
+\left\|
+\int_0^\tau S(\tau-s)\bigl(f(u(s))-f(v(s))\bigr)\,ds
+\right\|_{L^2} \\
+&\le
+\int_0^\tau
+\|S(\tau-s)\bigl(f(u(s))-f(v(s))\bigr)\|_{L^2}\,ds \\
+&\le
+\int_0^\tau \|f(u(s))-f(v(s))\|_{L^2}\,ds \\
+&\le
+L_f\int_0^\tau \|u(s)-v(s)\|_{L^2}\,ds \\
+&\le
+L_f T\,\|u-v\|_{X_T}.
+\end{align*}
+Taking the supremum over $\tau\in[0,T]$ gives
+\begin{equation}
+\|\mathcal Tu-\mathcal Tv\|_{X_T}\le L_f T\,\|u-v\|_{X_T}.
+\label{eq:XT_contraction_estimate}
+\end{equation}
+
+\medskip
+\noindent\textbf{Step 3: local existence and uniqueness.}
+If $T>0$ is chosen so that
+\[
+L_f T<1,
+\]
+then \eqref{eq:XT_contraction_estimate} shows that $\mathcal T$ is a contraction on the complete metric space $X_T$. Banach's fixed-point theorem therefore yields a unique $u\in X_T$ such that
+\[
+u=\mathcal Tu.
+\]
+By construction, this fixed point satisfies \eqref{eq:duhamel} on $[0,T]$, hence is a unique mild solution on $[0,T]$.
+
+\medskip
+\noindent\textbf{Step 4: extension to a global solution.}
+The local existence time depends only on the Lipschitz constant $L_f$, not on the size of the initial datum. Starting from time $0$, we first solve on $[0,T_*]$ for some $T_*>0$ such that $L_f T_*<1$. The solution value $\tilde u(T_*)\in L^2$ may then be used as new initial data, and the same fixed-point argument gives a unique solution on $[T_*,2T_*]$. Iterating this procedure produces a unique mild solution on every interval $[0,nT_*]$, hence on all of $[0,\infty)$.
+
+\medskip
+\noindent\textbf{Step 5: uniqueness on arbitrary bounded intervals.}
+Let $\tilde u,\tilde v\in C([0,T];L^2)$ be two mild solutions with the same initial datum. Then
+\[
+\tilde u(\tau)-\tilde v(\tau)
+=
+-\int_0^\tau S(\tau-s)\bigl(f(\tilde u(s))-f(\tilde v(s))\bigr)\,ds.
+\]
+Arguing as above,
+\[
+\|\tilde u(\tau)-\tilde v(\tau)\|_{L^2}
+\le
+L_f\int_0^\tau \|\tilde u(s)-\tilde v(s)\|_{L^2}\,ds.
+\]
+By Gronwall's inequality,
+\[
+\|\tilde u(\tau)-\tilde v(\tau)\|_{L^2}=0
+\qquad\text{for all }\tau\in[0,T].
+\]
+Thus the mild solution is unique on every bounded interval, and hence globally unique.
+
+\medskip
+\noindent\textbf{Step 6: Lipschitz dependence on the initial datum.}
+Let $\tilde u,\tilde v$ be the mild solutions corresponding to initial data $\tilde u_0,\tilde v_0\in L^2$. Subtracting the two Duhamel formulas gives
+\[
+\tilde u(\tau)-\tilde v(\tau)
+=
+S(\tau)(\tilde u_0-\tilde v_0)
+-\int_0^\tau S(\tau-s)\bigl(f(\tilde u(s))-f(\tilde v(s))\bigr)\,ds.
+\]
+Hence
+\[
+\|\tilde u(\tau)-\tilde v(\tau)\|_{L^2}
+\le
+\|\tilde u_0-\tilde v_0\|_{L^2}
++
+L_f\int_0^\tau \|\tilde u(s)-\tilde v(s)\|_{L^2}\,ds.
+\]
+Applying Gronwall's inequality once more, we obtain
+\[
+\|\tilde u(\tau)-\tilde v(\tau)\|_{L^2}
+\le
+e^{L_f\tau}\|\tilde u_0-\tilde v_0\|_{L^2},
+\qquad 0\le \tau\le T.
+\]
+Taking the supremum over $\tau\in[0,T]$ yields
+\[
+\|\tilde u-\tilde v\|_{X_T}
+\le
+e^{L_f T}\|\tilde u_0-\tilde v_0\|_{L^2}.
+\]
+This proves Lipschitz continuous dependence on the initial datum on every bounded time interval.
+\end{proof}
+
+
+\subsection{Local and global well-posedness in \texorpdfstring{$H^1$}{H1} for the piecewise-linear model}
+\label{subsec:H1_piecewise_wp}
+
+We now prove the $H^1$ well-posedness result for the piecewise-linear models
+\[
+f_-(u)=a\,u^+-b\,u^-,\qquad f_+(u)=a\,u^+ + b\,u^-,
+\qquad a,b\ge 0.
+\]
+Unlike the smooth $C^1$ framework considered earlier, this nonlinearity is only
+piecewise linear; however, its global Lipschitz continuity is sufficient for a
+direct fixed-point argument in $H^1(\R^d)$.
+
+
+\begin{lemma}[Positive and negative parts in $H^1$]
+\label{lem:pm_parts_H1}
+Let $u\in H^1(\R^d)$. Then $u^+,u^-\in H^1(\R^d)$, and
+\[
+\nabla u^+ = \mathbf 1_{\{u>0\}}\,\nabla u,
+\qquad
+\nabla u^- = -\mathbf 1_{\{u<0\}}\,\nabla u
+\quad \text{  on }\R^d.
+\]
+In particular,
+\[
+\|u^+\|_{H^1}\le \|u\|_{H^1},
+\qquad
+\|u^-\|_{H^1}\le \|u\|_{H^1}.
+\]
+Consequently, for either piecewise-linear choice $f=f_-$ or $f=f_+$ with $a,b\ge 0$
+one has $f(u)\in H^1(\R^d)$ and
+\begin{equation}
+\|f(u)\|_{H^1}\le \sqrt{2}\max(a,b)\,\|u\|_{H^1}.
+\label{eq:f_piecewise_H1_bound}
+\end{equation}
+Moreover, for all $u,v\in H^1(\R^d)$,
+\begin{equation}
+\|f(u)-f(v)\|_{H^1}\le \sqrt{2}\max(a,b)\,\|u-v\|_{H^1}.
+\label{eq:f_piecewise_H1_Lip}
+\end{equation}
+\end{lemma}
+
+\begin{proof}
+Since
+\[
+u^+=\max(u,0),\qquad u^-=\max(-u,0),
+\]
+the truncation map $s\mapsto s^+$ is 1-Lipschitz on $\R$, and likewise
+$s\mapsto s^-$. By Proposition~\ref{prop:sobolev_truncation}, this implies
+$u^+,u^-\in H^1(\R^d)$ and
+\[
+\nabla u^+ = \mathbf 1_{\{u>0\}}\,\nabla u,
+\qquad
+\nabla u^- = -\mathbf 1_{\{u<0\}}\,\nabla u
+\quad\text{ }
+\]
+Hence
+\[
+\|u^+\|_{L^2}\le \|u\|_{L^2},
+\qquad
+\|\nabla u^+\|_{L^2}\le \|\nabla u\|_{L^2},
+\]
+and similarly for \(u^-\), giving
+\[
+\|u^+\|_{H^1}\le \|u\|_{H^1},
+\qquad
+\|u^-\|_{H^1}\le \|u\|_{H^1}.
+\]
+
+Now let $f$ denote either $f_-$ or $f_+$.
+Then
+\[
+\|f(u)\|_{H^1}
+\le a\|u^+\|_{H^1}+b\|u^-\|_{H^1}
+\le \max(a,b)\bigl(\|u^+\|_{H^1}+\|u^-\|_{H^1}\bigr).
+\]
+Since \(\{u>0\}\) and \(\{u<0\}\) are disjoint,
+\[
+\|\nabla u^+\|_{L^2}^2+\|\nabla u^-\|_{L^2}^2=\|\nabla u\|_{L^2}^2,
+\qquad
+\|u^+\|_{L^2}^2+\|u^-\|_{L^2}^2=\|u\|_{L^2}^2.
+\]
+Thus
+\[
+\|u^+\|_{H^1}^2+\|u^-\|_{H^1}^2=\|u\|_{H^1}^2,
+\]
+and Cauchy's inequality gives
+\[
+\|u^+\|_{H^1}+\|u^-\|_{H^1}\le \sqrt{2}\,\|u\|_{H^1}.
+\]
+This proves \eqref{eq:f_piecewise_H1_bound}.
+Likewise,
+\[
+f(u)-f(v)=a\,(u^+-v^+)-b\,(u^-v^-),
+\]
+and using again that the maps \(s\mapsto s^\pm\) are 1-Lipschitz on \(H^1\), with the same disjoint-support estimate applied to \(u-v\),
+we obtain \eqref{eq:f_piecewise_H1_Lip}.
+Since the bounds \(\|u^\pm\|_{H^1}\le \|u\|_{H^1}\) and the identities \(\nabla u^\pm = \pm \mathbf{1}_{\{\pm u > 0\}}\nabla u\) do not depend on the sign in front of \(u^-\) in the definition of \(f\), the estimates \eqref{eq:f_piecewise_H1_bound} and \eqref{eq:f_piecewise_H1_Lip} hold identically for both the dissipative nonlinearity \(f_-(u)=au^+-bu^-\) and the non-dissipative nonlinearity \(f_+(u)=au^+ + bu^-\), with the same constant \(\sqrt{2}\max(a,b)\).
+\end{proof}
+
+\begin{theorem}[Local and global well-posedness in $H^1$ for the piecewise-linear models]
+\label{thm:H1_piecewise_wp}
+Let
+\[
+f=f_-\text{ or }f=f_+,
+\qquad a,b\ge 0,
+\]
+and let $\tilde u_0\in H^1(\R^d)$. Then there exists $T>0$ and a unique mild solution
+\[
+\tilde u\in C([0,T];H^1(\R^d))
+\]
+of
+\[
+\partial_\tau \tilde u-\Delta \tilde u+f(\tilde u)=0
+\qquad \text{in } (0,\infty)\times\R^d.
+\]
+Moreover, the solution depends continuously on the initial data in $H^1(\R^d)$.
+
+Since $f$ is globally Lipschitz on $\R$, the local solution extends uniquely to all times, and therefore
+\[
+\tilde u\in C([0,\infty);H^1(\R^d)).
+\]
+\end{theorem}
+
+\begin{proof}
+We prove the result by a Banach fixed-point argument in the Banach space
+\[
+X_T:=C([0,T];H^1(\R^d)),
+\qquad
+\|u\|_{X_T}:=\sup_{0\le \tau\le T}\|u(\tau)\|_{H^1}.
+\]
+
+The mild formulation of the equation is
+\begin{equation}
+u(\tau)=S(\tau)\tilde u_0-\int_0^\tau S(\tau-s)\,f(u(s))\,ds,
+\qquad 0\le \tau\le T,
+\label{eq:duhamel_H1_piecewise}
+\end{equation}
+where $S(\tau)=e^{\tau\Delta}$ denotes the heat semigroup.
+
+\medskip
+\noindent\textbf{Step 1: $f$ is globally Lipschitz on $\R$.}
+For $f=f_-$ one has $f(u)=au$ for $u\ge 0$ and $f(u)=bu$ for $u<0$. For $f=f_+$ one has $f(u)=au$ for $u\ge 0$ and $f(u)=-bu$ for $u<0$. In either case, direct inspection of the two branches yields
+\[
+|f(r)-f(s)|\le \max(a,b)\,|r-s|
+\qquad \text{for all }r,s\in\R.
+\]
+Thus $f$ is globally Lipschitz on $\R$ with Lipschitz constant $\max(a,b)$, for both models.
+
+\medskip
+\noindent\textbf{Step 2: $f$ acts continuously on $H^1(\R^d)$.}
+By Lemma~\ref{lem:pm_parts_H1}, for
+\[
+f=f_-\text{ or }f=f_+,
+\]
+with the explicit constant \(\sqrt{2}\max(a,b)\), one has
+\[
+\|f(u)\|_{H^1}\le \sqrt{2}\max(a,b)\|u\|_{H^1}
+\qquad\text{for all }u\in H^1(\R^d),
+\]
+and
+\begin{equation}
+\|f(u)-f(v)\|_{H^1}\le \sqrt{2}\max(a,b)\|u-v\|_{H^1}
+\qquad\text{for all }u,v\in H^1(\R^d).
+\label{eq:f_H1_piecewise_Lip}
+\end{equation}
+
+\medskip
+\noindent\textbf{Step 3: Definition of the fixed-point map.}
+Define $\mathcal T:X_T\to X_T$ by
+\[
+(\mathcal Tu)(\tau):=
+S(\tau)\tilde u_0-\int_0^\tau S(\tau-s)\,f(u(s))\,ds.
+\]
+Since the heat semigroup is bounded on $H^1(\R^d)$ with operator norm at most one,
+\[
+\|S(\tau)\phi\|_{H^1}\le \|\phi\|_{H^1},
+\qquad \tau\ge 0,
+\]
+indeed, by Plancherel,
+\[
+\|S(\tau)\phi\|_{H^1}^2
+=\int_{\R^d}(1+|\xi|^2)e^{-2\tau|\xi|^2}|\widehat\phi(\xi)|^2\,d\xi
+\le \|\phi\|_{H^1}^2,
+\]
+we obtain for $u\in X_T$ and $0\le \tau\le T$,
+\begin{align*}
+\|(\mathcal Tu)(\tau)\|_{H^1}
+&\le \|S(\tau)\tilde u_0\|_{H^1}
++\int_0^\tau \|S(\tau-s)f(u(s))\|_{H^1}\,ds \\
+&\le \|\tilde u_0\|_{H^1}
++\int_0^\tau \|f(u(s))\|_{H^1}\,ds \\
+&\le \|\tilde u_0\|_{H^1}
++\sqrt{2}\max(a,b)\int_0^\tau \|u(s)\|_{H^1}\,ds.
+\end{align*}
+Taking the supremum over $\tau\in[0,T]$ gives
+\[
+\|\mathcal Tu\|_{X_T}\le \|\tilde u_0\|_{H^1}+\sqrt{2}\max(a,b)T\|u\|_{X_T},
+\]
+so $\mathcal T$ maps $X_T$ into itself.
+
+\medskip
+\noindent\textbf{Step 4: Contraction estimate.}
+Let $u,v\in X_T$. Using the semigroup estimate and \eqref{eq:f_H1_piecewise_Lip},
+\begin{align*}
+\|(\mathcal Tu)(\tau)-(\mathcal Tv)(\tau)\|_{H^1}
+&\le
+\int_0^\tau
+\|S(\tau-s)\bigl(f(u(s))-f(v(s))\bigr)\|_{H^1}\,ds \\
+&\le
+\int_0^\tau
+\|f(u(s))-f(v(s))\|_{H^1}\,ds \\
+&\le
+\sqrt{2}\max(a,b)\int_0^\tau \|u(s)-v(s)\|_{H^1}\,ds \\
+&\le
+\sqrt{2}\max(a,b)T\,\|u-v\|_{X_T}.
+\end{align*}
+Taking the supremum over $\tau\in[0,T]$ yields
+\[
+\|\mathcal Tu-\mathcal Tv\|_{X_T}\le \sqrt{2}\max(a,b)T\,\|u-v\|_{X_T}.
+\]
+Hence the fixed-point map is a contraction in the Banach space sense whenever
+\[
+T<\frac{1}{\sqrt{2}\max(a,b)}.
+\]
+This is a contraction of the auxiliary map on $X_T$, not an $L^2$ contraction of solutions.
+
+\medskip
+\noindent\textbf{Step 5: Local existence and uniqueness.}
+By Banach's fixed point theorem, there exists a unique
+\[
+\tilde u\in C([0,T];H^1(\R^d))
+\]
+satisfying \eqref{eq:duhamel_H1_piecewise}. This is exactly the unique mild
+solution of \eqref{eq:semilinearheat} on $[0,T]$.
+
+\medskip
+\noindent\textbf{Step 6: Continuous dependence on the initial data.}
+Let $\tilde u,\tilde v\in X_T$ be the mild solutions corresponding to
+initial data $\tilde u_0,\tilde v_0\in H^1(\R^d)$. Subtracting the two
+Duhamel formulas and arguing as above, we obtain
+\[
+\|(\tilde u-\tilde v)(\tau)\|_{H^1}
+\le
+\|\tilde u_0-\tilde v_0\|_{H^1}
++\sqrt{2}\max(a,b)\int_0^\tau \|(\tilde u-\tilde v)(s)\|_{H^1}\,ds.
+\]
+Gronwall's inequality gives
+\[
+\|(\tilde u-\tilde v)(\tau)\|_{H^1}
+\le
+e^{\sqrt{2}\max(a,b)\tau}\,\|\tilde u_0-\tilde v_0\|_{H^1},
+\qquad 0\le \tau\le T.
+\]
+Taking the supremum over $\tau\in[0,T]$ shows continuous dependence in $H^1$.
+
+\medskip
+\noindent\textbf{Step 7: Global continuation.}
+The local existence time depends only on the constant \(\sqrt{2}\max(a,b)\),
+not on the size of the solution. Therefore the same fixed-point argument may be
+restarted at time $T$ with datum $\tilde u(T)\in H^1(\R^d)$, then at time $2T$,
+and so on. Uniqueness on overlapping intervals ensures that the local solutions
+patch together. Iterating in this way yields a unique global mild solution
+\[
+\tilde u\in C([0,\infty);H^1(\R^d)).
+\]
+This completes the proof.
+\end{proof}
+
+\begin{remark}[$H^1$ well-posedness is sign-agnostic]
+\label{rem:H1_sign_agnostic}
+The proof of Theorem~\ref{thm:H1_piecewise_wp} uses the nonlinearity only through the bounds \eqref{eq:f_piecewise_H1_bound} and \eqref{eq:f_piecewise_H1_Lip}, which by Lemma~\ref{lem:pm_parts_H1} hold identically for both $f_-$ and $f_+$. No monotonicity, sign-coercivity, or dissipativity assumption is invoked at any step. Consequently, the conclusions
+\[
+\tilde u \in C([0,\infty); H^1(\mathbb{R}^d)),
+\qquad
+\|\tilde u(\tau) - \tilde v(\tau)\|_{H^1} \le e^{\sqrt{2}\max(a,b)\tau}\|\tilde u_0 - \tilde v_0\|_{H^1},
+\]
+hold uniformly for the dissipative model $f_-$ and the non-dissipative model $f_+$, with the same Lipschitz constant $\sqrt{2}\max(a,b)$. The two models diverge only at the level of energy inequalities (Sections~\ref{subsec:L2_energy} and \ref{subsec:plus_L2_bound}), not at the level of $H^1$ well-posedness.
+\end{remark}
+\clearpage
+
+\section{Dissipative Model \texorpdfstring{$f_-(u)=a u^+ - b u^-$}{f-}}
+\label{sec:dissipative_model}
+
+The previous section deliberately avoided sign assumptions. We now add the extra structure that is specific to the core funding model and derive the stronger consequences that it permits: energy dissipation, contraction, comparison, and long-time decay. In this section only, we assume
+\begin{equation}
+f_-:\R\to\R,\qquad f_-(0)=0,\qquad f_- \text{ is nondecreasing},
+\label{eq:f_monotone}
+\end{equation}
+and, for the piecewise-linear funding model,
+\begin{equation}
+\boxed{
+f_-(u)=a\,u^+ - b\,u^-,
+\qquad a,b\ge 0.
+}
+\label{eq:f_piecewise_linear}
+\end{equation}
+
+\begin{lemma}[Elementary dissipation fact]
+\label{lem:elementary_dissipation}
+Assume \eqref{eq:f_monotone}. Then $f_-(s)s\ge 0$ for all $s\in\R$.
+\end{lemma}
+
+\begin{proof}
+If $s\ge0$, then monotonicity and $f_-(0)=0$ give $f_-(s)\ge0$, hence
+$f_-(s)s\ge0$. If $s\le0$, then monotonicity gives $f_-(s)\le0$, so again
+$f_-(s)s\ge0$.
+\end{proof}
+
+\subsection{\texorpdfstring{$L^2$}{L2} energy identity and dissipation}
+\label{subsec:L2_energy}
+
+Assume $\tilde u$ is a sufficiently smooth solution of \eqref{eq:semilinearheat} decaying at infinity.
+Multiplying \eqref{eq:semilinearheat} by $\tilde u$ and integrating over $\R^d$ yields
+\begin{align}
+0
+&=\int_{\R^d} \tilde u\,\partial_\tau \tilde u\,dz
+-\int_{\R^d} \tilde u\,\Delta \tilde u\,dz
++\int_{\R^d} f_-(\tilde u)\tilde u\,dz \nonumber\\
+&=\frac12\frac{d}{d\tau}\|\tilde u(\tau)\|_{L^2}^2
++\|\nabla \tilde u(\tau)\|_{L^2}^2
++\int_{\R^d} f_-(\tilde u(\tau,z))\,\tilde u(\tau,z)\,dz .
+\label{eq:L2_energy_general}
+\end{align}
+Since $f_-(s)s\ge 0$, the last term is nonnegative, hence
+\begin{equation}
+\boxed{
+\frac12\frac{d}{d\tau}\|\tilde u(\tau)\|_{2}^2 + \|\nabla \tilde u(\tau)\|_{L^2}^2 \le 0,
+\qquad
+\|\tilde u(\tau)\|_{L^2}\le \|\tilde u_0\|_{L^2}.
+}
+\label{eq:L2_decay_general}
+\end{equation}
+Financially, this inequality states that the discounted exposure cannot grow over time under the dissipative funding specification. In reduced-form terms, it expresses a no-arbitrage-type constraint: once funding costs are accounted for, the model does not permit systematic amplification of discounted mark-to-market value.
+Moreover, integrating \eqref{eq:L2_energy_general} from $0$ to $\tau$ gives the dissipation estimate
+\begin{equation}
+\boxed{
+\frac12\|\tilde u(\tau)\|_{L^2}^2
++\int_0^\tau \|\nabla \tilde u(s)\|_{L^2}^2\,ds
++\int_0^\tau\int_{\R^d} f_-(\tilde u)\tilde u\,dz\,ds
+=\frac12\|\tilde u_0\|_{L^2}^2.
+}
+\label{eq:L2_dissipation_general}
+\end{equation}
+\noindent This completes the formal derivation of the $L^2$ energy identity.
+
+
+
+
+\subsection{\texorpdfstring{$L^2$}{L2} contraction (uniqueness and stability)}
+\label{subsec:L2_contraction}
+
+Let $\tilde u,\tilde v$ be two (smooth) solutions of \eqref{eq:semilinearheat} with data
+$\tilde u_0,\tilde v_0\in L^2(\R^d)$ and set $w=\tilde u-\tilde v$. Then
+\[
+\partial_\tau w-\Delta w + \big(f_-(\tilde u)-f_-(\tilde v)\big)=0.
+\]
+Multiply by $w$ and integrate:
+\begin{equation}
+\frac12\frac{d}{d\tau}\|w(\tau)\|_{L^2}^2 + \|\nabla w(\tau)\|_{L^2}^2
++\int_{\R^d} \big(f_-(\tilde u)-f_-(\tilde v)\big)\,(\tilde u-\tilde v)\,dz
+=0.
+\label{eq:contraction_identity}
+\end{equation}
+By monotonicity, $(f_-(a)-f_-(b))(a-b)\ge 0$ for all $a,b$, so the last term is nonnegative and
+\begin{equation}
+\boxed{
+\| \tilde u(\tau)-\tilde v(\tau)\|_{L^2}\le \|\tilde u_0-\tilde v_0\|_{L^2},
+\qquad \tau\ge 0.
+}
+\label{eq:L2_contraction}
+\end{equation}
+This yields uniqueness in the natural $L^2$ energy class and Lipschitz continuous dependence on initial data.
+For mild solutions, this inequality is justified by approximating
+$\tilde u$ and $\tilde v$ by smooth solutions obtained from regularized initial data, deriving \eqref{eq:L2_contraction}
+at the smooth level, and passing to the limit using strong $L^2$
+convergence of the approximation scheme;
+\begin{comment}
+see \cite[Ch.~7]{EvansPDE}.
+\end{comment}
+
+\begin{comment}
+\subsection{\texorpdfstring{$H^1$}{H1} regularization}
+\label{subsec:minus_H1_regularization}
+
+For the dissipative model, the shared smoothing theory already gives the desired estimate once one inserts the $L^2$ contraction \eqref{eq:L2_decay_general}. We therefore record only the resulting corollary.
+
+\begin{corollary}[Instantaneous \(H^1\) regularization for \texorpdfstring{$f_-$}{f-}]
+\label{cor:minus_H1_smoothing}
+Let \(\tilde u_0\in L^2(\mathbb{R}^d)\), and let \(\tilde u\) be the mild solution of \eqref{eq:semilinearheat} with
+\[
+f=f_-(u)=a u^+-b u^-.
+\]
+Then for every \(\tau>0\),
+\[
+\tilde u(\tau)\in H^1(\mathbb{R}^d),
+\]
+and
+\begin{equation}
+\|\nabla \tilde u(\tau)\|_{L^2}
+\le C\,\tau^{-1/2}\|\tilde u_0\|_{L^2}
++ C\max(a,b)\|\tilde u_0\|_{L^2}\int_0^\tau (\tau-s)^{-1/2}\,ds.
+\label{eq:minus_H1_smoothing_explicit}
+\end{equation}
+\end{corollary}
+
+\begin{proof}
+Apply the shared estimate \eqref{eq:H1_smoothing_explicit} with $f=f_-$. Since \eqref{eq:L2_decay_general} gives
+\[
+\|\tilde u(s)\|_{L^2}\le \|\tilde u_0\|_{L^2}
+\qquad (s\ge 0),
+\]
+the function \(\varphi\) in \eqref{eq:H1_smoothing_explicit} may be taken to be identically \(1\).
+\end{proof}
+
+
+\end{comment}
+
+\subsection{A Gagliardo-Nirenberg estimate}
+\label{subsec:minus_GN}
+Assume now the Cauchy problem on $\R^d$ with initial datum
+\[
+\tilde u_0\in L^1(\R^d)\cap L^2(\R^d),
+\]
+and let
+\[
+f_-(s)=a\,s^+ - b\,s^-,
+\qquad a,b\ge 0,
+\qquad s^+=\max(s,0),\ \ s^- = \max(-s,0).
+\]
+Then
+\begin{equation}
+f_-(s)=
+\begin{cases}
+a s, & s\ge 0,\\
+b s, & s<0,
+\end{cases}
+\qquad\text{so that}\qquad
+f_-(s)\operatorname{sign}(s)\ge 0
+\label{eq:f_sign_piecewise}
+\end{equation}
+Hence, since $f_-(s)s\ge 0$ by Lemma~\ref{lem:elementary_dissipation}, and in particular $f_-(s)s=a(s^+)^2+b(s^-)^2\ge 0$ for the piecewise-linear model, we have that the piecewise-linear model is globally Lipschitz, nondecreasing, and genuinely dissipative on both branches.
+
+Let us invoke first the Gagliardo-Nirenberg inequality
+\begin{equation}
+\|\varphi\|_{L^2}^{2+\frac{4}{d}} \le C_N\,\|\nabla \varphi\|_{L^2}^2\,\|\varphi\|_{L^1}^{\frac{4}{d}}.
+\label{eq:GN}
+\end{equation}
+
+\medskip
+\noindent\textbf{Step 1: $L^1$-contraction.}
+Introduce
+\[
+\phi_\varepsilon(s):=\frac{s}{\sqrt{s^2+\varepsilon^2}},
+\qquad
+\Phi_\varepsilon(s):=\int_0^s \phi_\varepsilon(r)\,dr
+=\sqrt{s^2+\varepsilon^2}-\varepsilon,
+\qquad \varepsilon>0.
+\]
+Then
+\[
+\phi_\varepsilon'(s)=\frac{\varepsilon^2}{(s^2+\varepsilon^2)^{3/2}}\ge 0,
+\qquad
+|\phi_\varepsilon(s)|\le 1.
+\]
+Multiplying \eqref{eq:semilinearheat} by $\phi_\varepsilon(\tilde u)$ and integrating over $\R^d$, we obtain
+\[
+\frac{d}{d\tau}\int_{\R^d}\Phi_\varepsilon(\tilde u)\,dz
++\underbrace{\int_{\R^d}\phi_\varepsilon'(\tilde u)|\nabla \tilde u|^2\,dz}_{\ge 0}
++\underbrace{\int_{\R^d}f_-(\tilde u)\phi_\varepsilon(\tilde u)\,dz}_{\ge 0\text{ by }\eqref{eq:f_sign_piecewise}}
+=0.
+\]
+Dropping the two nonnegative terms and integrating from $0$ to $\tau$ gives
+\[
+\int_{\R^d}\Phi_\varepsilon(\tilde u(\tau))\,dz
+\le \int_{\R^d}\Phi_\varepsilon(\tilde u_0)\,dz.
+\]
+Since $\Phi_\varepsilon(s) = \sqrt{s^2+\varepsilon^2}-\varepsilon \nearrow |s|$ 
+monotonically as $\varepsilon\downarrow 0$, by a convergence argument,
+$\int_{\R^d}\Phi_\varepsilon(\tilde u(\tau))\,dz \nearrow \|\tilde u(\tau)\|_{L^1}$
+and $\int_{\R^d}\Phi_\varepsilon(\tilde u_0)\,dz \nearrow \|\tilde u_0\|_{L^1}$,
+so passing to the limit yields
+\begin{equation}
+\|\tilde u(\tau)\|_{L^1}\le \|\tilde u_0\|_{L^1},
+\qquad \tau\ge 0.
+\label{eq:L1_piecewise}
+\end{equation}
+
+\medskip
+\noindent\textbf{Step 2: coercive $L^2$ energy identity.}
+Set
+\[
+y(\tau):=\|\tilde u(\tau)\|_{L^2}^2.
+\]
+From the $L^2$ energy identity \eqref{eq:L2_energy_general} and the piecewise-linear dissipation
+$f_-(s)s=a(s^+)^2+b(s^-)^2\ge 0$, we obtain
+\[
+\frac12 y'(\tau)\le -\|\nabla\tilde u(\tau)\|_{L^2}^2.
+\]
+Combined with \eqref{eq:GN} and \eqref{eq:L1_piecewise}, this gives the ODE inequality \eqref{eq:ode_piecewise}. Indeed,
+\[
+\|\nabla \tilde u(\tau)\|_{L^2}^2
+\ge
+\frac{1}{C_N}\,\frac{\|\tilde u(\tau)\|_{L^2}^{2+\frac{4}{d}}}{\|\tilde u(\tau)\|_{L^1}^{\frac{4}{d}}}
+\ge
+\frac{1}{C_N}\,\frac{y(\tau)^{1+\frac{2}{d}}}{\|\tilde u_0\|_{L^1}^{\frac{4}{d}}}.
+\]
+Therefore
+\begin{equation}
+y'(\tau)
+\le
+-\frac{2}{C_N}\,\frac{y(\tau)^{1+\frac{2}{d}}}{\|\tilde u_0\|_{L^1}^{\frac{4}{d}}}.
+\label{eq:ode_piecewise}
+\end{equation}
+Integrating this differential inequality gives
+\begin{equation}
+\boxed{
+\|\tilde u(\tau)\|_{L^2}^2
+\le
+\Bigl(
+\|\tilde u_0\|_{L^2}^{-\frac{4}{d}}
++
+\frac{4}{d\,C_N}\,\|\tilde u_0\|_{L^1}^{-\frac{4}{d}}\tau
+\Bigr)^{-\frac{d}{2}}.
+}
+\label{eq:piecewise_GN_final}
+\end{equation}
+In particular,
+\begin{equation}
+\boxed{
+\|\tilde u(\tau)\|_{L^2}^2
+\lesssim
+\|\tilde u_0\|_{L^1}^2\,\tau^{-\frac{d}{2}},
+\qquad \tau\to\infty.
+}
+\label{eq:piecewise_GN_asymp}
+\end{equation}
+Thus the piecewise-linear model enjoys the same Nash/Gagliardo-Nirenberg algebraic decay as the general dissipative semilinear heat equation under the stated $L^1\cap L^2$ assumptions, with the nonlinear term improving coercivity rather than weakening it.
+
+
+
+
+
+
+
+
+
+
+% ----------
+
+
+
+\clearpage
+\section{The non-dissipative model \texorpdfstring{$f_+(u)=a u^+ + b u^-$}{f+(u)=a u+ + b u-}}
+\label{sec:plus_model}
+
+We now turn to the non-dissipative extension model. The nonlinearity \(f_+\) has the same global Lipschitz and piecewise-linear regularity as \(f_-\), so the shared well-posedness and parabolic regularization theory continue to apply. What fails, however, is the sign-coercive structure underlying the dissipative model. In particular, one no longer expects \(L^2\)-contraction, comparison principles, or genuine decay estimates. The purpose of this section is therefore to identify precisely which conclusions survive in the absence of dissipativity, and to distinguish them from the stronger results available for \(f_-\).
+
+We study the semilinear heat equation
+\begin{equation}
+\boxed{
+\partial_\tau u - \Delta u + f_+(u)=0,
+\qquad (\tau,z)\in (0,\infty)\times \mathbb{R}^d,
+}
+\label{eq:plus_semilinear_heat}
+\end{equation}
+with initial condition
+\[
+u(0,z)=u_0(z),
+\qquad z\in\mathbb{R}^d,
+\]
+where
+\begin{equation}
+\boxed{
+f_+(u):=a\,u^+ + b\,u^-,
+\qquad a,b\ge 0,
+\qquad
+u^+:=\max(u,0),\quad u^-:=\max(-u,0).
+}
+\label{eq:plus_nonlinearity}
+\end{equation}
+
+Unlike the dissipative model \(f_-(u)=a u^+-b u^-\), the present nonlinearity is not sign-coercive. Indeed,
+\begin{equation}
+f_+(u)\,u
+=
+\begin{cases}
+a u^2, & u\ge 0,\\[1mm]
+-b u^2, & u<0,
+\end{cases}
+\label{eq:plus_sign_structure}
+\end{equation}
+so in particular
+\begin{equation}
+f_+(u)\,u \ge -b\,|u|^2
+\qquad\text{for all }u\in\mathbb{R},
+\label{eq:plus_lower_bound_fu}
+\end{equation}
+but \(f_+(u)u\) is not nonnegative in general. Consequently, the energy-decay method available for the dissipative model does not apply here in the same form. The correct framework is instead based on global Lipschitz continuity, semigroup estimates, and Gr\"onwall bounds.
+
+\subsection{Basic properties of the nonlinearity}
+\label{subsec:plus_basic_properties}
+
+We collect the elementary properties of \(f_+\).
+
+\begin{lemma}[Basic properties of \(f_+\)]
+\label{lem:plus_basic_properties}
+Let \(f_+\) be given by \eqref{eq:plus_nonlinearity}. Then:
+\begin{enumerate}
+    \item \(f_+(0)=0\);
+    \item \(f_+\) is globally Lipschitz on \(\mathbb{R}\), with
+    \[
+    |f_+(u)-f_+(v)|\le L\,|u-v|,
+    \qquad L:=\max(a,b);
+    \]
+    \item \(f_+\) has at most linear growth:
+    \[
+    |f_+(u)|\le L\,|u|
+    \qquad\text{for all }u\in\mathbb{R};
+    \]
+    \item \(f_+\) satisfies the lower bound
+    \[
+    f_+(u)\,u\ge -b\,|u|^2
+    \qquad\text{for all }u\in\mathbb{R}.
+    \]
+\end{enumerate}
+\end{lemma}
+
+\begin{proof}
+The identity \(f_+(0)=0\) is immediate. Since \(u\mapsto u^+\) and \(u\mapsto u^-\) are both 1-Lipschitz on \(\mathbb{R}\),
+\[
+|f_+(u)-f_+(v)|
+\le a\,|u^+-v^+| + b\,|u^-v^-|
+\le (a+b)|u-v|.
+\]
+More precisely, by considering separately the regions \(u,v\ge 0\), \(u,v\le 0\), and mixed signs, one obtains the sharper bound with \(L=\max(a,b)\). The linear-growth estimate follows from
+\[
+|f_+(u)| \le a\,u^+ + b\,u^- \le \max(a,b)(u^+ + u^-)=\max(a,b)|u|.
+\]
+Finally, \eqref{eq:plus_lower_bound_fu} follows from the casewise formula \eqref{eq:plus_sign_structure}.
+\end{proof}
+
+\subsection{Global well-posedness in \texorpdfstring{$L^2$}{L2}}
+\label{subsec:plus_mild_wp}
+
+Let \(S(\tau):=e^{\tau\Delta}\) be the heat semigroup on \(L^2(\mathbb{R}^d)\). A solution of \eqref{eq:plus_semilinear_heat} is a function
+\[
+u\in C([0,\infty);L^2(\mathbb{R}^d))
+\]
+satisfying the Duhamel formula \eqref{eq:duhamel_H1} with $f(u)=f_+(u),$ namely
+\begin{equation}
+u(\tau)=S(\tau)u_0-\int_0^\tau S(\tau-s)\,f_+(u(s))\,ds.
+\label{eq:plus_duhamel}
+\end{equation}
+
+\begin{corollary}[Global well-posedness in \(L^2\) for the plus model]
+\label{cor:plus_global_wp_L2}
+For every \(u_0\in L^2(\mathbb{R}^d)\), the Cauchy problem \eqref{eq:plus_semilinear_heat}-\eqref{eq:plus_nonlinearity} admits a unique global mild solution
+\[
+u\in C([0,\infty);L^2(\mathbb{R}^d)).
+\]
+Moreover, the data-to-solution map is Lipschitz continuous on bounded time intervals.
+\end{corollary}
+
+\begin{proof}
+By Lemma~\ref{lem:plus_basic_properties}, \(f_+\) is globally Lipschitz and satisfies \(f_+(0)=0\). Theorem~\ref{thm:L2_global_wp} therefore applies directly to \eqref{eq:plus_semilinear_heat}, yielding the stated global mild solution and Lipschitz dependence on the initial datum.
+\end{proof}
+
+\subsection{\texorpdfstring{$L^2$}{L2} a priori bound via Gr\"onwall}
+\label{subsec:plus_L2_bound}
+
+We next derive the correct \(L^2\) estimate for the non-dissipative model. Unlike the dissipative case, one does not obtain decay.
+
+\begin{proposition}[\(L^2\) bound for the non-dissipative model]
+\label{prop:plus_L2_gronwall}
+Let \(u\) be a sufficiently smooth solution of \eqref{eq:plus_semilinear_heat}. Then
+\begin{equation}
+\frac12\frac{d}{d\tau}\|u(\tau)\|_{L^2}^2
++\|\nabla u(\tau)\|_{L^2}^2
++\int_{\mathbb{R}^d} f_+(u(\tau,z))\,u(\tau,z)\,dz
+=0.
+\label{eq:plus_L2_identity}
+\end{equation}
+Consequently,
+\begin{equation}
+\frac12\frac{d}{d\tau}\|u(\tau)\|_{L^2}^2
+\le b\,\|u(\tau)\|_{L^2}^2,
+\label{eq:plus_L2_diffineq}
+\end{equation}
+and therefore
+\begin{equation}
+\boxed{
+\|u(\tau)\|_{L^2}^2 \le e^{2b\tau}\,\|u_0\|_{L^2}^2,
+\qquad \tau\ge 0.
+}
+\label{eq:plus_L2_gronwall}
+\end{equation}
+\end{proposition}
+
+\begin{proof}
+Multiplying \eqref{eq:plus_semilinear_heat} by \(u\), integrating over \(\mathbb{R}^d\), and integrating by parts yields \eqref{eq:plus_L2_identity}. Using \eqref{eq:plus_lower_bound_fu}, we obtain
+\[
+\int_{\mathbb{R}^d} f_+(u)\,u\,dz \ge -b\int_{\mathbb{R}^d}|u|^2\,dz = -b\|u\|_{L^2}^2.
+\]
+Substituting into \eqref{eq:plus_L2_identity} gives
+\[
+\frac12\frac{d}{d\tau}\|u(\tau)\|_{L^2}^2 + \|\nabla u(\tau)\|_{L^2}^2 - b\|u(\tau)\|_{L^2}^2 \le 0,
+\]
+hence
+\[
+\frac12\frac{d}{d\tau}\|u(\tau)\|_{L^2}^2 \le b\|u(\tau)\|_{L^2}^2.
+\]
+Gronwall's lemma yields \eqref{eq:plus_L2_gronwall}.
+\end{proof}
+
+\begin{remark}[Interpretation of the estimate]
+\label{rem:plus_no_decay}
+Estimate \eqref{eq:plus_L2_gronwall} gives at most exponential control on finite time intervals. In particular, it does not imply decay as \(\tau\to\infty\). The nonlinearity \(f_+\) is therefore well posed in \(L^2\), but not dissipative in the sense of the energy method used for the model \(f_-\).
+\end{remark}
+
+\subsection{Instantaneous \texorpdfstring{$H^1$}{H1} regularization}
+\label{subsec:plus_H1_regularization}
+
+Even though the sign-coercive energy method fails, the parabolic smoothing effect remains available.
+
+\begin{proposition}[Instantaneous \(H^1\) regularization]
+\label{prop:plus_H1_smoothing}
+Let \(u_0\in L^2(\mathbb{R}^d)\), and let \(u\) be the mild solution given by Corollary~\ref{cor:plus_global_wp_L2}. Then for every \(\tau>0\),
+\[
+u(\tau)\in H^1(\mathbb{R}^d),
+\]
+and
+\begin{equation}
+\|\nabla u(\tau)\|_{L^2}
+\le C\,\tau^{-1/2}\|u_0\|_{L^2}
++ C L\int_0^\tau (\tau-s)^{-1/2} e^{bs}\|u_0\|_{L^2}\,ds.
+\label{eq:plus_H1_smoothing_explicit}
+\end{equation}
+Hence \(u(\tau)\in H^1(\mathbb{R}^d)\) for every \(\tau>0\).
+\end{proposition}
+
+\begin{proof}
+Differentiate the Duhamel formula \eqref{eq:plus_duhamel}:
+\[
+\nabla u(\tau)=\nabla S(\tau)u_0-\int_0^\tau \nabla S(\tau-s)f_+(u(s))\,ds.
+\]
+Taking \(L^2\)-norms and using the heat semigroup estimate
+\[
+\|\nabla S(t)\varphi\|_{L^2} \le C t^{-1/2}\|\varphi\|_{L^2}
+\qquad (t>0),
+\]
+together with the bound \eqref{eq:plus_L2_gronwall} we achieve from
+\[
+\|f_+(u(s))\|_{L^2}\le L\|u(s)\|_{L^2}\le L e^{bs}\|u_0\|_{L^2},
+\]
+Then the estimate \eqref{eq:plus_H1_smoothing_explicit} readily follows from \eqref{eq:H1_smoothing_explicit}.
+\end{proof}
+
+\begin{remark}
+The smoothing estimate above is sufficient to show that the plus-model solution becomes \(H^1\) for every positive time. However, unlike in the dissipative case, one does not obtain a monotone \(H^1\) energy inequality from the sign of the nonlinear term.
+\end{remark}
+
+\subsection{\texorpdfstring{$H^1$}{H1} well-posedness for the plus model}
+\label{subsec:plus_H1_wp}
+
+The sign-agnostic $H^1$ theory from Theorem~\ref{thm:H1_piecewise_wp} already covers the plus model; we record the specialization only for convenience.
+
+\begin{corollary}[$H^1$ well-posedness for the plus model]
+\label{cor:plus_H1_wp}
+Let $u_0 \in H^1(\mathbb{R}^d)$. Then \eqref{eq:plus_semilinear_heat} admits a unique global mild solution
+\[
+u \in C([0,\infty); H^1(\mathbb{R}^d))
+\]
+and the data-to-solution map is Lipschitz continuous on bounded time intervals: for any two initial data $u_0, v_0 \in H^1(\mathbb{R}^d)$ and corresponding solutions $u, v$,
+\[
+\|u(\tau) - v(\tau)\|_{H^1}
+\le e^{\sqrt{2}\max(a,b)\tau}\|u_0 - v_0\|_{H^1},
+\qquad \tau \ge 0.
+\]
+\end{corollary}
+
+\begin{proof}
+Apply Theorem~\ref{thm:H1_piecewise_wp} with $f = f_+$; see also Remark~\ref{rem:H1_sign_agnostic}.
+\end{proof}
+
+
+
+
+
+\subsection{A Gagliardo-Nirenberg estimate with exponential weight}
+\label{subsec:plus_GN}
+
+
+
+We now show that the usual Gagliardo-Nirenberg argument may still be applied, but with an exponentially weighted quantity instead of a decaying one. More precisely we have
+
+\begin{proposition}[Gagliardo-Nirenberg estimate for the plus model]
+\label{prop:plus_GN}
+Let \(u\) be a sufficiently regular solution of \eqref{eq:plus_semilinear_heat} with
+\(
+u_0\in L^1(\mathbb{R}^d)\cap L^2(\mathbb{R}^d).
+\)
+Then
+\begin{equation}
+\boxed{
+\|u(\tau)\|_{L^2}^2
+\le
+e^{2b\tau}
+\left(
+\|u_0\|_{L^2}^{-4/d}
++
+\frac{4}{d\,C_N}\|u_0\|_{L^1}^{-4/d}\tau
+\right)^{-d/2},
+}
+\label{eq:plus_GN_final}
+\end{equation}
+where \(C_N\) is the constant in the Gagliardo-Nirenberg inequality
+\[
+\|\varphi\|_{L^2}^{2+4/d}
+\le C_N \|\nabla \varphi\|_{L^2}^2 \|\varphi\|_{L^1}^{4/d}.
+\]
+In particular,
+\begin{equation}
+\|u(\tau)\|_{L^2}^2 \lesssim e^{2b\tau}\|u_0\|_{L^1}^2\,\tau^{-d/2}
+\qquad (\tau\to\infty).
+\label{eq:plus_GN_asymptotic}
+\end{equation}
+\end{proposition}
+
+\begin{proof}
+
+Assume now the Cauchy problem on $\R^d$ with initial datum
+\[
+\tilde u_0\in L^1(\R^d)\cap L^2(\R^d),
+\]
+and let
+\[
+f(s)=a\,s^+ + b\,s^-,
+\qquad a,b\ge 0,
+\qquad s^+=\max(s,0),\ \ s^-=\max(-s,0).
+\]
+
+We first recall the Gagliardo-Nirenberg inequality: there exists a constant
+$C_N=C_N(d)>0$ such that for every
+$\varphi\in H^1(\R^d)\cap L^1(\R^d)$,
+\begin{equation}
+\|\varphi\|_{L^2}^{2+\frac{4}{d}}
+\le C_N\,\|\nabla \varphi\|_{L^2}^2\,\|\varphi\|_{L^1}^{\frac{4}{d}}.
+\label{eq:GN_piecewise}
+\end{equation}
+
+\medskip
+\noindent\textbf{Step 1: exponentially weighted \(L^1\) estimate.}
+For the finance nonlinearity \(f_+\), one does not have \(L^1\)-contraction in general. Instead, one uses Kato's inequality in the distributional sense:
+\[
+\partial_\tau | u|-\Delta | u|
+\le \operatorname{sign}( u)\bigl(\partial_\tau \ u-\Delta \ u\bigr).
+\]
+Since
+\[
+\partial_\tau  u-\Delta \ u=-f_+(\ u),
+\]
+we obtain
+\[
+\partial_\tau | u|-\Delta | u|
+\le -\,\operatorname{sign}( u)\,f_+( u).
+\]
+Now, by cases,
+\[
+-\operatorname{sign}(s)\,f_+(s)
+=
+\begin{cases}
+-a s=-a|s| \le b|s|, & s>0,\\[1mm]
+0, & s=0,\\[1mm]
+-(-1)\,b(-s)=b|s|, & s<0.
+\end{cases}
+\]
+Hence
+\[
+-\operatorname{sign}(s)\,f_+(s)\le b|s|
+\qquad\text{for all }s\in\R,
+\]
+and therefore
+\begin{equation}
+\partial_\tau |\tilde u|-\Delta |\tilde u|\le b\,|\tilde u|
+\qquad\text{in }\mathcal D'((0,\infty)\times\R^d).
+\label{eq:kato_finance_piecewise}
+\end{equation}
+
+Define
+\[
+v(\tau,z):=e^{-b\tau}|\tilde u(\tau,z)|.
+\]
+Then
+\[
+\partial_\tau v-\Delta v
+=
+e^{-b\tau}\bigl(\partial_\tau |\tilde u|-\Delta |\tilde u|-b|\tilde u|\bigr)
+\le 0.
+\]
+Thus \(v\) is subcaloric. Integrating over \(\R^d\) (for instance by localization with cutoffs and letting the cutoff radius tend to infinity), one finds that
+\[
+\frac{d}{d\tau}\|v(\tau)\|_{L^1(\R^d)}\le 0.
+\]
+Since \(v(0,\cdot)=|\tilde u_0|\), this gives
+\begin{equation}
+\boxed{
+\|\tilde u(\tau)\|_{L^1(\R^d)}
+\le e^{b\tau}\,\|\tilde u_0\|_{L^1(\R^d)},
+\qquad \tau\ge 0.
+}
+\label{eq:L1_finance_piecewise}
+\end{equation}
+
+\medskip
+\noindent\textbf{Step 2: \(L^2\)-energy identity and lower bound on the reaction term.}
+Set
+\[
+y(\tau):=\|\tilde u(\tau)\|_{L^2}^2.
+\]
+From the \(L^2\)-energy identity,
+\[
+\frac12 y'(\tau)
+=
+-\|\nabla \tilde u(\tau)\|_{L^2}^2
+-\int_{\R^d} f_+(\tilde u(\tau,z))\,\tilde u(\tau,z)\,dz.
+\]
+Now
+\[
+f_+(s)s
+=
+\begin{cases}
+a s^2 = a(s^+)^2, & s>0,\\[1mm]
+0, & s=0,\\[1mm]
+b(-s)s=-b s^2=-b(s^-)^2, & s<0,
+\end{cases}
+\]
+hence
+\begin{equation}
+f_+(s)s=a(s^+)^2-b(s^-)^2\ge -b|s|^2.
+\label{eq:finance_piecewise_fs}
+\end{equation}
+Therefore
+\[
+\int_{\R^d} f_+(\tilde u)\tilde u\,dz
+\ge -b\int_{\R^d}|\tilde u|^2\,dz
+=-b\,y(\tau),
+\]
+and so
+\[
+\frac12 y'(\tau)\le -\|\nabla \tilde u(\tau)\|_{L^2}^2+b\,y(\tau).
+\]
+Equivalently,
+\begin{equation}
+y'(\tau)\le -2\|\nabla \tilde u(\tau)\|_{L^2}^2+2b\,y(\tau).
+\label{eq:yprime_finance_piecewise}
+\end{equation}
+
+\medskip
+\noindent\textbf{Step 3: insert the Gagliardo-Nirenberg lower bound.}
+By \eqref{eq:GN} and \eqref{eq:L1_finance_piecewise},
+\[
+\|\nabla \tilde u(\tau)\|_{L^2}^2
+\ge
+\frac{1}{C_N}\,
+\frac{\|\tilde u(\tau)\|_{L^2}^{2+\frac{4}{d}}}{\|\tilde u(\tau)\|_{L^1}^{\frac{4}{d}}}
+\ge
+\frac{1}{C_N}\,
+\frac{y(\tau)^{1+\frac{2}{d}}}{\bigl(e^{b\tau}\|\tilde u_0\|_{L^1}\bigr)^{\frac{4}{d}}}.
+\]
+Thus
+\[
+\|\nabla \tilde u(\tau)\|_{L^2}^2
+\ge
+\frac{1}{C_N}\,
+e^{-\frac{4b}{d}\tau}\,
+\|\tilde u_0\|_{L^1}^{-\frac{4}{d}}\,
+y(\tau)^{1+\frac{2}{d}}.
+\]
+Substituting into \eqref{eq:yprime_finance_piecewise}, we obtain
+\begin{equation}
+y'(\tau)
+\le
+-\frac{2}{C_N}\,
+e^{-\frac{4b}{d}\tau}\,
+\|\tilde u_0\|_{L^1}^{-\frac{4}{d}}\,
+y(\tau)^{1+\frac{2}{d}}
++2b\,y(\tau).
+\label{eq:finance_piecewise_ode}
+\end{equation}
+
+\medskip
+\noindent\textbf{Step 4: exponentially weighted \(L^2\) quantity.}
+Define
+\[
+z(\tau):=e^{-2b\tau}y(\tau).
+\]
+Then
+\[
+z'(\tau)=e^{-2b\tau}\bigl(y'(\tau)-2b\,y(\tau)\bigr).
+\]
+Using \eqref{eq:finance_piecewise_ode}, we obtain
+\[
+z'(\tau)
+\le
+-\frac{2}{C_N}\,
+e^{-2b\tau}\,
+e^{-\frac{4b}{d}\tau}\,
+\|\tilde u_0\|_{L^1}^{-\frac{4}{d}}\,
+y(\tau)^{1+\frac{2}{d}}.
+\]
+Since
+\[
+y(\tau)=e^{2b\tau}z(\tau),
+\]
+we have
+\[
+y(\tau)^{1+\frac{2}{d}}
+=
+e^{2b\tau(1+\frac{2}{d})}z(\tau)^{1+\frac{2}{d}}.
+\]
+Hence
+\[
+e^{-2b\tau}e^{-\frac{4b}{d}\tau}y(\tau)^{1+\frac{2}{d}}
+=
+e^{-2b\tau}e^{-\frac{4b}{d}\tau}
+e^{2b\tau(1+\frac{2}{d})}
+z(\tau)^{1+\frac{2}{d}}
+=
+z(\tau)^{1+\frac{2}{d}}.
+\]
+Therefore
+\begin{equation}
+z'(\tau)
+\le
+-\frac{2}{C_N}\,
+\|\tilde u_0\|_{L^1}^{-\frac{4}{d}}\,
+z(\tau)^{1+\frac{2}{d}}.
+\label{eq:z_finance_piecewise}
+\end{equation}
+
+\medskip
+\noindent\textbf{Step 5: solve the differential inequality.}
+Let
+\(
+\beta:=\frac{2}{d}.
+\)
+Then
+\[
+\frac{d}{d\tau}\bigl(z(\tau)^{-\beta}\bigr)
+=
+-\beta\,z(\tau)^{-(1+\beta)}z'(\tau)
+\ge
+\beta\,\frac{2}{C_N}\,\|\tilde u_0\|_{L^1}^{-\frac{4}{d}}.
+\]
+Integrating from \(0\) to \(\tau\) gives
+\[
+z(\tau)^{-\beta}
+\ge
+z(0)^{-\beta}
++
+\frac{4}{d\,C_N}\,\|\tilde u_0\|_{L^1}^{-\frac{4}{d}}\tau.
+\]
+Since
+\[
+z(0)=y(0)=\|\tilde u_0\|_{L^2}^2,
+\]
+we infer
+\[
+z(\tau)
+\le
+\Bigl(
+\|\tilde u_0\|_{L^2}^{-\frac{4}{d}}
++
+\frac{4}{d\,C_N}\,\|\tilde u_0\|_{L^1}^{-\frac{4}{d}}\tau
+\Bigr)^{-\frac{d}{2}}.
+\]
+Recalling that \(y(\tau)=e^{2b\tau}z(\tau)\), we conclude
+\begin{equation}
+\boxed{
+\|\tilde u(\tau)\|_{L^2}^2
+=
+y(\tau)
+\le
+e^{2b\tau}
+\Bigl(
+\|\tilde u_0\|_{L^2}^{-\frac{4}{d}}
++
+\frac{4}{d\,C_N}\,\|\tilde u_0\|_{L^1}^{-\frac{4}{d}}\tau
+\Bigr)^{-\frac{d}{2}}.
+}
+\label{eq:finance_piecewise_final}
+\end{equation}
+In particular,
+\begin{equation}
+\boxed{
+\|\tilde u(\tau)\|_{L^2}^2
+\lesssim
+e^{2b\tau}\,\|\tilde u_0\|_{L^1}^2\,\tau^{-d/2},
+\qquad \tau\to\infty.
+}
+\label{eq:finance_piecewise_asymp}
+\end{equation}
+
+
+
+\end{proof}
+
+
+
+
+
+
+
+
+
+
+\clearpage
+
+\section{The nonlinear Black-Scholes: proofs of the main results}
+\label{sec:nonlinear_bs_proofs}
+
+The heat equation theory is now transported back to the original pricing
+variables.  We keep the notation of Section~\ref{sec:transform}.  Thus
+\[
+    \tau=T-t,\qquad
+    U(\tau,S):=e^{r\tau}V(T-\tau,S),
+\]
+\[
+    x=\log S,\qquad
+    y=x+\beta\tau,\qquad
+    y=Lz,\qquad
+    LL^\top=\frac12Q,
+\]
+where
+\[
+    \beta_i=r-\frac12Q_{ii},\qquad i=1,\dots,d.
+\]
+The weight induced by the logarithmic change of variables is
+\[
+    \omega(S):=(S_1\cdots S_d)^{-1}.
+\]
+We write \(L^p_\omega\) for \(L^p((0,\infty)^d,\omega(S)\,dS)\).
+
+\subsection{Inverse transform and norm equivalences}
+\label{subsec:norm_equivalences}
+
+For a terminal payoff \(\Phi\), the heat-side initial datum is
+\begin{equation}
+    \tilde u_0(z):=\Phi(e^{Lz}),
+    \qquad z\in\mathbb R^d.
+    \label{eq:transport_datum}
+\end{equation}
+Equivalently,
+\[
+    \Phi(S)=\tilde u_0(L^{-1}\log S).
+\]
+
+\begin{proposition}[Inverse transform]
+\label{prop:inverse_transform_new}
+Let \(g:\mathbb R\to\mathbb R\) be the Black-Scholes nonlinearity, and
+assume that \(g\) is positively homogeneous of degree one:
+\[
+    g(\lambda v)=\lambda g(v)
+    \qquad\text{for all }\lambda\ge0,\ v\in\mathbb R.
+\]
+Let \(f\) be the corresponding time-independent heat-side nonlinearity
+obtained from \(g\) under this positive-homogeneity assumption.  Let
+\(\tilde u\) solve the heat-side Cauchy problem
+\[
+    \partial_\tau\tilde u-\Delta_z\tilde u+f(\tilde u)=0,
+    \qquad
+    \tilde u(0,z)=\tilde u_0(z),
+\]
+and define
+\begin{equation}
+    U(\tau,S):=
+    \tilde u\!\left(
+        \tau,
+        L^{-1}(\log S+\beta\tau)
+    \right),
+    \qquad
+    V(t,S):=e^{-r(T-t)}U(T-t,S).
+    \label{eq:inverse_map_new}
+\end{equation}
+Then \(V\) solves
+\[
+    V_t+\frac12\sum_{i,j=1}^d Q_{ij}S_iS_jV_{S_iS_j}
+    +r\sum_{i=1}^d S_iV_{S_i}
+    -rV-g(V)=0,
+    \qquad
+    V(T,S)=\Phi(S).
+\]
+Conversely, any solution of this Black-Scholes problem gives a heat-side
+solution through the transformations of Section~\ref{sec:transform}.
+\end{proposition}
+
+\begin{proof}
+The discounting step in Section~\ref{sec:transform} converts the reaction
+term \(g(V)\) into the heat-side reaction
+\[
+    e^{r\tau}g(e^{-r\tau}U).
+\]
+Thus, before imposing positive homogeneity, the induced heat nonlinearity is
+\[
+    f(\tau,y):=e^{r\tau}g(e^{-r\tau}y).
+\]
+The positive homogeneity of \(g\) is used exactly at this point.  Since
+\(e^{-r\tau}\ge0\),
+\[
+    g(e^{-r\tau}U)=e^{-r\tau}g(U),
+\]
+and therefore
+\begin{equation}
+    e^{r\tau}g(e^{-r\tau}U)=g(U).
+    \label{eq:homogeneity_discount_step}
+\end{equation}
+Hence the heat-side nonlinearity is time-independent and is given by
+\(f(y)=g(y)\) after discounting.
+
+Now set \(\tau=T-t\), \(x=\log S\), \(y=x+\beta\tau\), and
+\(z=L^{-1}y\).  Formula \eqref{eq:inverse_map_new} is precisely the inverse
+of the discounting, logarithmic, moving-frame, and whitening transforms from
+Section~\ref{sec:transform}.  Since \(LL^\top=\frac12Q\), the operator
+\(\Delta_z\) becomes the Black-Scholes diffusion operator in \(S\), the
+translation \(y=x+\beta\tau\) restores the first-order drift, and the factor
+\(e^{-r\tau}\) restores the term \(-rV\).
+
+At \(\tau=0\),
+\[
+    U(0,S)=\tilde u_0(L^{-1}\log S)=\Phi(S)
+\]
+by \eqref{eq:transport_datum}.  Hence \(V(T,S)=\Phi(S)\).  Each change of
+variables is invertible, so the correspondence is one-to-one.
+\end{proof}
+
+\begin{lemma}[Norm equivalences]
+\label{lem:norm_equivalences_new}
+Let \(1\le p<\infty\).  For \(U\) and \(\tilde u\) related by
+\eqref{eq:inverse_map_new},
+\begin{equation}
+    \|U(\tau)\|_{L^p_\omega}^p
+    =
+    |\det L|\,\|\tilde u(\tau)\|_{L^p(\mathbb R^d)}^p.
+    \label{eq:norm_equiv_Lp}
+\end{equation}
+In particular, at \(\tau=0\),
+\begin{equation}
+    \|\Phi\|_{L^p_\omega}^p
+    =
+    |\det L|\,\|\tilde u_0\|_{L^p(\mathbb R^d)}^p.
+    \label{eq:datum_norm_equiv_Lp}
+\end{equation}
+Moreover, with
+\[
+    D_SU:=(S_1\partial_{S_1}U,\dots,S_d\partial_{S_d}U),
+\]
+one has
+\begin{equation}
+    \int_{(0,\infty)^d}
+    (D_SU)^\top\!\left(\frac12Q\right)(D_SU)\,\omega(S)\,dS
+    =
+    |\det L|\,\|\nabla_z\tilde u(\tau)\|_{L^2(\mathbb R^d)}^2.
+    \label{eq:norm_equiv_H1}
+\end{equation}
+Consequently,
+\[
+    \Phi\in L^2_\omega
+    \quad\Longleftrightarrow\quad
+    \tilde u_0\in L^2(\mathbb R^d),
+\]
+and
+\[
+    \Phi\in H^1_{\omega,Q}
+    \quad\Longleftrightarrow\quad
+    \tilde u_0\in H^1(\mathbb R^d),
+\]
+where
+\[
+    H^1_{\omega,Q}
+    :=
+    \left\{
+    W\in L^2_\omega:
+    \int_{(0,\infty)^d}
+    (D_SW)^\top\!\left(\frac12Q\right)(D_SW)\,\omega\,dS<\infty
+    \right\}.
+\]
+\end{lemma}
+
+\begin{proof}
+The change \(S_i=e^{x_i}\) gives \(dx=\omega(S)\,dS\).  The translation
+\(y=x+\beta\tau\) has unit Jacobian, and \(y=Lz\) gives
+\(dy=|\det L|\,dz\).  Hence
+\[
+\begin{aligned}
+    \|U(\tau)\|_{L^p_\omega}^p
+    &=\int_{(0,\infty)^d}|U(\tau,S)|^p\,\omega(S)\,dS  \\
+    &=\int_{\mathbb R^d}|u(\tau,y)|^p\,dy
+      =|\det L|\int_{\mathbb R^d}|\tilde u(\tau,z)|^p\,dz.
+\end{aligned}
+\]
+This proves \eqref{eq:norm_equiv_Lp}; \eqref{eq:datum_norm_equiv_Lp}
+follows by setting \(\tau=0\).
+
+For the gradient identity, \(\tilde u(\tau,z)=u(\tau,Lz)\) gives
+\[
+    \nabla_z\tilde u=L^\top\nabla_yu.
+\]
+Changing variables from \(z\) to \(y\),
+\[
+    |\det L|\,\|\nabla_z\tilde u\|_{L^2}^2
+    =
+    \int_{\mathbb R^d}
+    (\nabla_yu)^\top(LL^\top)(\nabla_yu)\,dy.
+\]
+Since \(LL^\top=\frac12Q\), \(y=x+\beta\tau\), and
+\[
+    \partial_{x_i}U(\tau,e^x)=S_i\partial_{S_i}U(\tau,S),
+\]
+we have \(\nabla_yu=D_SU\).  Changing from \(x\) back to \(S\) gives
+\eqref{eq:norm_equiv_H1}.
+\end{proof}
+
+
+\begin{lemma}[Transport of heat-side estimates to weighted Black-Scholes variables]
+\label{lem:transport_weighted_estimates}
+Assume \(g\) is positively homogeneous of degree one, let \(f\) be the induced heat-side nonlinearity, and let \(\tilde u\), \(U\), and \(V\) be related by Proposition~\ref{prop:inverse_transform_new}. For any sufficiently regular \(W:(0,\infty)^d\to\mathbb R\), define
+\[
+E_Q[W]:=
+\int_{(0,\infty)^d}
+(D_SW)^\top\!\left(\frac12Q\right)(D_SW)\,\omega\,dS.
+\]
+Then:
+\begin{enumerate}[label=(\roman*)]
+\item for \(p\in\{1,2\}\), any heat-side estimate of the form
+\[
+\|\tilde u(\tau)\|_{L^p(\mathbb R^d)}
+\le
+A(\tau)\|\tilde u_0\|_{L^p(\mathbb R^d)}
+\]
+transports to
+\[
+\|U(\tau)\|_{L^p_\omega}
+\le
+A(\tau)\|\Phi\|_{L^p_\omega},
+\qquad
+\|V(t)\|_{L^p_\omega}
+\le
+e^{-r(T-t)}A(T-t)\|\Phi\|_{L^p_\omega};
+\]
+\item if \(\tilde u\in C([0,T];H^1(\mathbb R^d))\), then \(U\in C([0,T];H^1_{\omega,Q})\). More generally, any heat-side gradient estimate of the form
+\[
+\|\nabla_z\tilde u(\tau)\|_{L^2(\mathbb R^d)}
+\le
+B(\tau)\|\tilde u_0\|_{L^2(\mathbb R^d)}
+\]
+gives
+\[
+E_Q[U(\tau)]^{1/2}
+\le
+B(\tau)\|\Phi\|_{L^2_\omega};
+\]
+\item one has the reaction-term identity
+\[
+\int_{(0,\infty)^d}g(U(\tau,S))U(\tau,S)\,\omega(S)\,dS
+=
+|\det L|\int_{\mathbb R^d}f(\tilde u(\tau,z))\tilde u(\tau,z)\,dz.
+\]
+Consequently, any heat-side identity or inequality involving only the quantities \(\|\tilde u\|_{L^1}\), \(\|\tilde u\|_{L^2}\), \(\|\nabla_z\tilde u\|_{L^2}\), and \(\int f(\tilde u)\tilde u\) transports to the weighted variables after multiplying by \(|\det L|\).
+\end{enumerate}
+\end{lemma}
+
+\begin{proof}
+Part~(i) is immediate from \eqref{eq:norm_equiv_Lp}, \eqref{eq:datum_norm_equiv_Lp}, and the relation \(V(t)=e^{-r(T-t)}U(T-t)\). Part~(ii) follows from \eqref{eq:norm_equiv_H1} together with the \(p=2\) case of part~(i). For part~(iii), the inverse map gives \(\tilde u(\tau,z)=U(\tau,S)\) pointwise, and positive homogeneity identifies the heat-side nonlinearity with the discounted Black-Scholes nonlinearity. Using \(dz=|\det L|^{-1}\omega(S)\,dS\) yields the claimed identity.
+\end{proof}
+
+
+
+\subsection{Piecewise-linear models}
+
+We have the following.
+
+\begin{theorem}[Weighted well-posedness and \(H^1\) regularization]
+\label{thm:BS_discounted_core}
+Let
+\[
+    g_-(v)=a v^+-b v^-,
+    \qquad
+    g_+(v)=a v^+ + b v^-,
+    \qquad a,b\ge0.
+\]
+For either choice \(g=g_-\) or \(g=g_+\), assume
+\[
+    \Phi\in L^2_\omega((0,\infty)^d).
+\]
+Then the nonlinear Black-Scholes problem with terminal datum \(\Phi\)
+admits a unique discounted mild solution
+\[
+    U\in C([0,T];L^2_\omega).
+\]
+Equivalently,
+\[
+    V(t,S)=e^{-r(T-t)}U(T-t,S)
+    \in C([0,T];L^2_\omega).
+\]
+The solution depends Lipschitz continuously on the terminal datum on bounded
+time intervals.
+
+If in addition \(\Phi\in H^1_{\omega,Q}\), then
+\[
+    U\in C([0,T];H^1_{\omega,Q}).
+\]
+If only \(\Phi\in L^2_\omega\), then
+\[
+    U(\tau,\cdot)\in H^1_{\omega,Q}
+    \qquad\text{for every }\tau>0.
+\]
+More precisely,
+\begin{equation}
+\begin{aligned}
+    &\left(
+    \int_{(0,\infty)^d}
+    (D_SU(\tau))^\top\!\left(\frac12Q\right)(D_SU(\tau))\,
+    \omega\,dS
+    \right)^{1/2}                                      \\
+    &\qquad\le
+    C\tau^{-1/2}\|\Phi\|_{L^2_\omega}
+    +
+    C\|\Phi\|_{L^2_\omega}\int_0^\tau(\tau-s)^{-1/2}e^{cs}\,ds ,
+\end{aligned}
+\label{eq:BS_H1_smoothing}
+\end{equation}
+with \(c=0\) for \(g_-\) and \(c=b\) for \(g_+\).
+\end{theorem}
+
+\begin{proof}
+By Lemma~\ref{lem:norm_equivalences_new}, \(\Phi\in L^2_\omega\) if and only if \(\tilde u_0\in L^2(\mathbb R^d)\). Positive homogeneity sends \(g_-\) and \(g_+\) to the heat-side nonlinearities
+\[
+f_-(u)=a u^+-b u^-,
+\qquad
+f_+(u)=a u^+ + b u^-,
+\]
+and both are globally Lipschitz. Theorem~\ref{thm:L2_global_wp} therefore gives a unique global heat-side mild solution \(\tilde u\in C([0,T];L^2(\mathbb R^d))\), with Lipschitz dependence on the initial datum. Lemma~\ref{lem:transport_weighted_estimates}(i) transports these conclusions to \(U\in C([0,T];L^2_\omega)\) and \(V(t)=e^{-r(T-t)}U(T-t)\).
+
+If \(\Phi\in H^1_{\omega,Q}\), then Lemma~\ref{lem:norm_equivalences_new} gives \(\tilde u_0\in H^1(\mathbb R^d)\). Theorem~\ref{thm:H1_piecewise_wp} applies to both piecewise-linear models, and Lemma~\ref{lem:transport_weighted_estimates}(ii) yields \(U\in C([0,T];H^1_{\omega,Q})\).
+
+If only \(\Phi\in L^2_\omega\), then the shared smoothing estimate \eqref{eq:H1_smoothing_explicit} applies with \(\varphi(s)\equiv 1\) in the dissipative case by \eqref{eq:L2_decay_general}, and with \(\varphi(s)=e^{bs}\) in the plus model by \eqref{eq:plus_L2_gronwall}. Lemma~\ref{lem:transport_weighted_estimates}(ii) then gives \eqref{eq:BS_H1_smoothing}.
+\end{proof}
+
+\begin{proposition}[Energy identity]
+\label{prop:BS_energy_identity}
+Let \(g\) be a positively homogeneous Black-Scholes nonlinearity, let \(f\) be the induced heat-side nonlinearity, and let \(U\) be the discounted Black-Scholes unknown corresponding to a sufficiently smooth heat-side solution \(\tilde u\). Then \(U\) satisfies the weighted identity
+\begin{equation}
+    \frac12\frac{d}{d\tau}\|U(\tau)\|_{L^2_\omega}^2
+    +
+    \int_{(0,\infty)^d}
+    (D_SU)^\top\!\left(\frac12Q\right)(D_SU)\,\omega\,dS
+    +
+    \int_{(0,\infty)^d}g(U)U\,\omega\,dS
+    =
+    0.
+    \label{eq:BS_energy_identity}
+\end{equation}
+\end{proposition}
+
+\begin{proof}
+The heat-side identity is
+\[
+    \frac12\frac{d}{d\tau}\|\tilde u(\tau)\|_{L^2}^2
+    +
+    \|\nabla_z\tilde u(\tau)\|_{L^2}^2
+    +
+    \int_{\mathbb R^d}f(\tilde u)\tilde u\,dz
+    =
+    0.
+\]
+Apply Lemma~\ref{lem:transport_weighted_estimates}(iii) together with Lemma~\ref{lem:norm_equivalences_new} to transport the three terms in this identity.
+\end{proof}
+
+\subsection{Dissipative model}
+
+In this subsection
+\[
+    g_-(v)=a v^+-b v^-,
+    \qquad a,b\ge0,
+\]
+and the induced heat-side nonlinearity is
+\[
+    f_-(u)=a u^+-b u^-.
+\]
+
+\begin{theorem}[Dissipative weighted energy estimate]
+\label{thm:BS_dissipative_energy}
+Let \(\Phi\in L^2_\omega\), and let \(U\) be the discounted solution
+corresponding to \(g_-\).  Then, for every \(\tau\in[0,T]\),
+\begin{equation}
+    \|U(\tau)\|_{L^2_\omega}
+    \le
+    \|\Phi\|_{L^2_\omega},
+    \label{eq:U_L2_contraction_theorem}
+\end{equation}
+and
+\begin{equation}
+\begin{aligned}
+    \frac12\|U(\tau)\|_{L^2_\omega}^2
+    &+
+    \int_0^\tau\!\!\int_{(0,\infty)^d}
+    (D_SU)^\top\!\left(\frac12Q\right)(D_SU)\,\omega\,dS\,ds \\
+    &+
+    \int_0^\tau\!\!\int_{(0,\infty)^d}
+    g_-(U)U\,\omega\,dS\,ds
+    \le
+    \frac12\|\Phi\|_{L^2_\omega}^2 .
+\end{aligned}
+\label{eq:U_weighted_energy_theorem}
+\end{equation}
+Consequently,
+\begin{equation}
+    \|V(t)\|_{L^2_\omega}
+    \le
+    e^{-r(T-t)}\|\Phi\|_{L^2_\omega}.
+    \label{eq:V_weighted_L2_theorem}
+\end{equation}
+\end{theorem}
+
+\begin{proof}
+By Lemma~\ref{lem:transport_weighted_estimates}(iii), the heat-side dissipation estimate \eqref{eq:L2_dissipation_general} becomes exactly \eqref{eq:U_weighted_energy_theorem}. Dropping the nonnegative terms gives \eqref{eq:U_L2_contraction_theorem}. The estimate for \(V\) follows from \(V(t)=e^{-r(T-t)}U(T-t)\).
+\end{proof}
+
+\begin{theorem}[Contraction and dependence]
+\label{thm:BS_original_core}
+Let \(U_1,U_2\) be two discounted solutions of the dissipative model with
+terminal data \(\Phi_1,\Phi_2\in L^2_\omega\).  Then
+\begin{equation}
+    \|U_1(\tau)-U_2(\tau)\|_{L^2_\omega}
+    \le
+    \|\Phi_1-\Phi_2\|_{L^2_\omega},
+    \qquad 0\le\tau\le T.
+    \label{eq:BS_L2_contraction}
+\end{equation}
+Equivalently,
+\[
+    \|V_1(t)-V_2(t)\|_{L^2_\omega}
+    \le
+    e^{-r(T-t)}\|\Phi_1-\Phi_2\|_{L^2_\omega}.
+\]
+\end{theorem}
+
+\begin{proof}
+Apply Lemma~\ref{lem:transport_weighted_estimates}(i) with \(p=2\) to the heat-side contraction estimate \eqref{eq:L2_contraction}, applied to \(\tilde u_1-\tilde u_2\). The estimate for \(V_1-V_2\) then follows from \(V_i(t)=e^{-r(T-t)}U_i(T-t)\).
+\end{proof}
+
+\begin{theorem}[Weighted \(L^1\) contraction and Gagliardo-Nirenberg decay]
+\label{thm:BS_dissipative_GN}
+Assume \(g=g_-\) and
+\[
+    \Phi\in L^1_\omega((0,\infty)^d)\cap L^2_\omega((0,\infty)^d).
+\]
+Then
+\[
+    \|U(\tau)\|_{L^1_\omega}
+    \le
+    \|\Phi\|_{L^1_\omega}.
+\]
+Moreover, if \(C_N\) is the heat-side Gagliardo-Nirenberg constant, set
+\[
+    C_{N,Q}:=C_N|\det L|^{-2/d}.
+\]
+Then
+\begin{equation}
+    \|U(\tau)\|_{L^2_\omega}^2
+    \le
+    \left(
+    \|\Phi\|_{L^2_\omega}^{-4/d}
+    +
+    \frac{4}{dC_{N,Q}}
+    \|\Phi\|_{L^1_\omega}^{-4/d}\tau
+    \right)^{-d/2}.
+    \label{eq:U_weighted_decay_theorem}
+\end{equation}
+Consequently, for \(t<T\),
+\begin{equation}
+    \|V(t)\|_{L^2_\omega}
+    \le
+    e^{-r(T-t)}
+    \left(
+    \|\Phi\|_{L^2_\omega}^{-4/d}
+    +
+    \frac{4}{dC_{N,Q}}
+    \|\Phi\|_{L^1_\omega}^{-4/d}(T-t)
+    \right)^{-d/4}.
+    \label{eq:V_weighted_decay_theorem}
+\end{equation}
+\end{theorem}
+
+\begin{proof}
+By Lemma~\ref{lem:transport_weighted_estimates}(i) with \(p=1\), the heat-side \(L^1\) contraction \eqref{eq:L1_piecewise} yields
+\[
+\|U(\tau)\|_{L^1_\omega}\le \|\Phi\|_{L^1_\omega}.
+\]
+
+With \(E_Q\) as in Lemma~\ref{lem:transport_weighted_estimates}, the heat-side Gagliardo-Nirenberg inequality
+\[
+\|\tilde u\|_{L^2}^{2+4/d}
+\le
+C_N\|\nabla_z\tilde u\|_{L^2}^2\|\tilde u\|_{L^1}^{4/d}
+\]
+and Lemma~\ref{lem:transport_weighted_estimates}(i)--(ii) give
+\[
+\|U\|_{L^2_\omega}^{2+4/d}
+\le
+C_N|\det L|^{-2/d}E_Q[U]\|U\|_{L^1_\omega}^{4/d}.
+\]
+Hence \(C_{N,Q}=C_N|\det L|^{-2/d}\). Combining this weighted inequality with \eqref{eq:U_weighted_energy_theorem}, the weighted \(L^1_\omega\) contraction above, and the same ODE argument as in the heat-side proof of \eqref{eq:piecewise_GN_final}, gives \eqref{eq:U_weighted_decay_theorem}. The estimate for \(V\) follows from \(V(t)=e^{-r(T-t)}U(T-t)\).
+\end{proof}
+
+\subsection{Non-dissipative model}
+
+In this subsection
+\[
+    g_+(v)=a v^+ + b v^-,
+    \qquad a,b\ge0,
+\]
+and the induced heat-side nonlinearity is
+\[
+    f_+(u)=a u^+ + b u^-.
+\]
+This model has the shared Lipschitz and piecewise-linear structure, but it
+does not have the dissipative sign condition used in the preceding subsection.
+
+\begin{theorem}[Black-Scholes-side bounds for the non-dissipative model]
+\label{thm:BS_original_plus}
+Let \(\Phi\in L^2_\omega\).  Then the plus-model Black-Scholes problem
+admits a unique discounted solution
+\[
+     U\in C([0,T];L^2_\omega).
+\]
+Moreover,
+\begin{equation}
+    \| U(\tau)\|_{L^2_\omega}^2
+    \le
+    e^{2b\tau}\|\Phi\|_{L^2_\omega}^2,
+    \qquad 0\le\tau\le T,
+    \label{eq:U_plus_weighted_L2_theorem}
+\end{equation}
+and hence
+\begin{equation}
+    \|V(t)\|_{L^2_\omega}^2
+    \le
+    e^{-2(r-b)(T-t)}\|\Phi\|_{L^2_\omega}^2.
+    \label{eq:V_plus_weighted_L2_theorem}
+\end{equation}
+
+For every \(\tau>0\),
+\[
+     U(\tau,\cdot)\in H^1_{\omega,Q},
+\]
+and
+\begin{equation}
+\begin{aligned}
+    &\left(
+    \int_{(0,\infty)^d}
+    (D_S U(\tau))^\top\!\left(\frac12Q\right)(D_S U(\tau))
+    \,\omega\,dS
+    \right)^{1/2}                                      \\
+    &\qquad\le
+    C\tau^{-1/2}\|\Phi\|_{L^2_\omega}
+    +
+    C\max(a,b)
+    \int_0^\tau(\tau-s)^{-1/2}e^{bs}\|\Phi\|_{L^2_\omega}\,ds .
+\end{aligned}
+\label{eq:U_plus_weighted_smoothing}
+\end{equation}
+
+If, in addition,
+\[
+    \Phi\in L^1_\omega\cap L^2_\omega,
+\]
+then, with \(C_{N,Q}=C_N|\det L|^{-2/d}\),
+\begin{equation}
+    \| U(\tau)\|_{L^2_\omega}^2
+    \le
+    e^{2b\tau}
+    \left(
+    \|\Phi\|_{L^2_\omega}^{-4/d}
+    +
+    \frac{4}{dC_{N,Q}}
+    \|\Phi\|_{L^1_\omega}^{-4/d}\tau
+    \right)^{-d/2},
+    \label{eq:U_plus_GN_weighted}
+\end{equation}
+and therefore, for \(t<T\),
+\begin{equation}
+    \|V(t)\|_{L^2_\omega}
+    \le
+    e^{-(r-b)(T-t)}
+    \left(
+    \|\Phi\|_{L^2_\omega}^{-4/d}
+    +
+    \frac{4}{dC_{N,Q}}
+    \|\Phi\|_{L^1_\omega}^{-4/d}(T-t)
+    \right)^{-d/4}.
+    \label{eq:V_plus_GN_theorem}
+\end{equation}
+The estimates \eqref{eq:U_plus_GN_weighted} and
+\eqref{eq:V_plus_GN_theorem} are a priori bounds with an exponential factor;
+they are not dissipative decay statements.
+\end{theorem}
+
+\begin{proof}
+The well-posedness statement is already contained in Theorem~\ref{thm:BS_discounted_core}.
+
+Applying Lemma~\ref{lem:transport_weighted_estimates}(i) with \(p=2\) to \eqref{eq:plus_L2_gronwall} gives \eqref{eq:U_plus_weighted_L2_theorem}, and the bound for \(V\) follows from the same part of the lemma.
+
+Applying Lemma~\ref{lem:transport_weighted_estimates}(ii) to Proposition~\ref{prop:plus_H1_smoothing} gives \eqref{eq:U_plus_weighted_smoothing}.
+
+If \(\Phi\in L^1_\omega\cap L^2_\omega\), then Lemma~\ref{lem:transport_weighted_estimates}(i) gives
+\[
+\|\tilde u_0\|_{L^2}=|\det L|^{-1/2}\|\Phi\|_{L^2_\omega},
+\qquad
+\|\tilde u_0\|_{L^1}=|\det L|^{-1}\|\Phi\|_{L^1_\omega}.
+\]
+Substituting these identities into \eqref{eq:plus_GN_final} and multiplying by \(|\det L|\) yields \eqref{eq:U_plus_GN_weighted} with \(C_{N,Q}=C_N|\det L|^{-2/d}\). The estimate for \(V\) again follows from \(V(t)=e^{-r(T-t)}U(T-t)\).
+\end{proof}
+
+\paragraph{Black-Scholes interpretation.}
+
+For the non-dissipative piecewise-linear nonlinearity
+\[
+f(u)=a\,u^+ + b\,u^-,
+\qquad a,b\ge 0,
+\]
+
+the heat-side asymptotic estimate \eqref{eq:plus_GN_asymptotic} gives
+\begin{equation}
+\|\tilde u(\tau)\|_{L^2(\R^d)}^2
+\lesssim
+e^{2b\tau}\,\|\tilde u_0\|_{L^1(\R^d)}^2\,\tau^{-d/2},
+\qquad \tau>0.
+\label{eq:GN_piecewise_heat}
+\end{equation}
+Transporting this bound back to the discounted Black-Scholes variable \(U\), one obtains
+\begin{equation}
+\|U(\tau)\|_{L^2_w((0,\infty)^d)}^2
+\lesssim
+e^{2b\tau}\,\|U(0)\|_{L^1_w((0,\infty)^d)}^2\,\tau^{-d/2},
+\qquad \tau>0,
+\label{eq:GN_piecewise_U}
+\end{equation}
+or equivalently
+\begin{equation}
+\|U(\tau)\|_{L^2_w((0,\infty)^d)}
+\lesssim
+e^{b\tau}\,\|U(0)\|_{L^1_w((0,\infty)^d)}\,\tau^{-d/4}.
+\label{eq:GN_piecewise_U_sqrt}
+\end{equation}
+
+Since \(U(0,S)=V(T,S)=\Phi(S)\), we may rewrite \eqref{eq:GN_piecewise_U} as
+\begin{equation}
+\|U(\tau)\|_{L^2_w((0,\infty)^d)}^2
+\lesssim
+e^{2b\tau}\,\|\Phi\|_{L^1_w((0,\infty)^d)}^2\,\tau^{-d/2}.
+\label{eq:GN_piecewise_U_payoff}
+\end{equation}
+
+We now return to the original option price \(V\). By construction,
+\[
+V(t,S)=e^{-r(T-t)}U(T-t,S),
+\]
+hence, with \(\tau=T-t\),
+\[
+\|V(t)\|_{L^2_w}
+=
+e^{-r\tau}\,\|U(\tau)\|_{L^2_w}.
+\]
+Combining this with \eqref{eq:GN_piecewise_U_sqrt}, we obtain
+\begin{equation}
+\boxed{
+\|V(t)\|_{L^2_w((0,\infty)^d)}
+\lesssim
+e^{-(r-b)(T-t)}\,
+\|\Phi\|_{L^1_w((0,\infty)^d)}\,
+(T-t)^{-d/4}.
+}
+\label{eq:financial_piecewise_main}
+\end{equation}
+Equivalently,
+\begin{equation}
+\boxed{
+\|V(t)\|_{L^2_w((0,\infty)^d)}^2
+\lesssim
+e^{-2(r-b)(T-t)}\,
+\|\Phi\|_{L^1_w((0,\infty)^d)}^2\,
+(T-t)^{-d/2}.
+}
+\label{eq:financial_piecewise_main_sq}
+\end{equation}
+
+Estimate \eqref{eq:financial_piecewise_main} shows that, in the weighted \(L^2\)-norm naturally induced by the logarithmic transform, the option price is governed by two competing mechanisms.
+
+\begin{itemize}
+\item The factor
+\[
+e^{-r(T-t)}
+\]
+is the usual exponential damping produced by discounting at the risk-free rate \(r\).
+
+\item The factor
+\[
+e^{b(T-t)}
+\]
+comes from the negative branch of the piecewise-linear funding term \(f(u)=a u^+ + b u^-\). In the energy calculation, this branch contributes with the unfavorable sign
+\[
+f(u)u=a(u^+)^2-b(u^-)^2,
+\]
+and therefore weakens the dissipative effect of the diffusion.
+\end{itemize}
+
+Thus the estimate is controlled by the \emph{effective rate}
+\[
+r-b.
+\]
+This leads to three regimes.
+
+\medskip
+\noindent\textbf{(i) The case \(r>b\).}
+If the discount rate dominates the adverse contribution of the funding term, then
+\[
+e^{-(r-b)(T-t)}
+\]
+is a genuine damping factor. In this regime, the weighted \(L^2\)-norm of the option price is bounded by an exponentially decreasing factor multiplied by the polynomial smoothing term \((T-t)^{-d/4}\). Hence the estimate still reflects a net stabilizing effect as one moves away from maturity.
+
+\medskip
+\noindent\textbf{(ii) The case \(r=b\).}
+If the two effects exactly balance, then the exponential factors cancel and one is left with the purely polynomial estimate
+\[
+\|V(t)\|_{L^2_w}
+\lesssim
+\|\Phi\|_{L^1_w}\,(T-t)^{-d/4}.
+\]
+In this borderline regime, discounting no longer improves the bound beyond the parabolic smoothing already present in the heat flow.
+
+\medskip
+\noindent\textbf{(iii) The case \(b>r\).}
+If the negative-side funding contribution exceeds the discount rate, then the exponential factor becomes
+\[
+e^{(b-r)(T-t)},
+\]
+and the estimate allows growth as one moves backward from maturity. This does not mean that the solution necessarily blows up; rather, it means that the present argument no longer yields a decaying a priori bound in the weighted \(L^2\)-norm. In other words, the funding asymmetry may overcome the stabilizing effect of discounting at the level of this estimate.
+
+\medskip
+\medskip
+\noindent\textbf{Financial meaning.}
+Unlike the dissipative model \(g_-\), the non-dissipative term \(g_+\) does
+not arise from a strict no-arbitrage replication argument, such as those
+developed by \cite{Piterbarg2010}, or from the bilateral XVA setting of
+\cite{BurgardKjaer2011}. Rather, it should be interpreted as a reduced-form
+modification encoding the strength of an asymmetric correction applied to the
+negative exposure.
+
+The economic interpretation becomes more concrete when we separately examine
+the positive and negative branches of the term. On the positive side,
+\(g_+(V)=aV^+\), the model behaves exactly like the dissipative model \(g_-\):
+positive receivables require financing, which reduces the present value. On
+the other hand, the negative exposure term \(g_+(V)=bV^-\) acts in the
+opposite direction compared to \(g_-\). Whereas \(g_-\) dampens negative
+exposures and drives \(V\) back toward zero, the term \(g_+(V)=bV^-\ge 0\)
+enters the pricing equation with sign \(-g_+(V)\le 0\), which drives \(V\)
+further negative rather than toward zero.
+
+As discussed above, this term should be interpreted not as a direct
+replication-based funding adjustment, but rather as a reduced-form
+credit-risk, regulatory, or stress-test correction. Mathematically, it tests
+which estimates survive when the sign of the negative branch is flipped. The
+effect of this sign flip is that the usual exponential decay driven by
+discounting at rate \(r\) is weakened to an effective rate \(r-b\). When
+\(b<r\), discounting still dominates and the estimate exhibits decay in the
+weighted \(L^2\)-norm. When \(b>r\), this decay is no longer guaranteed at
+the level of the estimate, although the solution itself remains globally
+bounded by Proposition~\ref{prop:plus_L2_gronwall}. Thus, the parameter \(b\)
+measures how strongly the negative-branch correction counteracts the influence
+of discounting.
+
+\begin{remark}
+Estimate \eqref{eq:plus_GN_final} is not a decay estimate in the usual sense.
+The polynomial factor \(\tau^{-d/2}\) is multiplied by the exponential factor
+\(e^{2b\tau}\), so no genuine algebraic decay follows unless \(b=0\). The
+correct interpretation is that diffusion still provides smoothing, but the
+negative branch of the nonlinearity introduces a competing growth mechanism.
+\end{remark}
+
+
+\newpage
+
+\section{Conclusion}
+\label{sec:conclusions}
+
+Motivated by frictions in modern financial markets, we analysed valuation
+adjustment models by extending the classical multi-asset Black--Scholes
+framework with a semilinear adjustment term. After discounting, a logarithmic
+change of variables, a moving-frame transformation, and a whitening
+transformation, the Black--Scholes equation is converted into a semilinear
+heat equation. This allows us to apply classical
+semilinear heat equation theory to study the behaviour of the transformed
+problem.
+
+Within this framework, we established global well-posedness, instantaneous
+regularization, and weighted energy identities, together with a detailed
+analysis of dissipative and non-dissipative regimes.
+
+For the dissipative model
+\[
+    g_-(v)=a v^+-b v^-,
+\]
+we obtained weighted \(L^2\)-energy estimates, \(L^2\)-contraction,
+continuous dependence on the terminal payoff, weighted \(L^1\)-contraction,
+and Gagliardo--Nirenberg-type decay estimates after transporting the
+heat-side results back to the original Black--Scholes variables.
+
+For the non-dissipative model
+\[
+    g_+(v)=a v^+ + b v^-,
+\]
+the transported conclusions are the shared well-posedness and
+\(H^1\)-regularization results, the Gronwall \(L^2\)-bound, and the weighted
+Gagliardo--Nirenberg bound with an exponential factor. The dissipative
+conclusions proved for \(g_-\) rely on the sign structure
+\[
+    f_-(u)u\ge0
+\]
+and on the monotonicity assumptions used in the heat-side comparison and
+contraction arguments. In contrast,
+\[
+    f_+(u)u=a(u^+)^2-b(u^-)^2
+\]
+is not sign-definite. For the non-dissipative term, we only obtain
+well-posedness, instantaneous regularization, and a priori bounds of
+Gronwall type, together with weighted Gagliardo--Nirenberg estimates
+involving an exponential growth factor.
+
+\paragraph{Future work}
+A natural direction for future work is to extend the framework to
+American-style contracts, which can be exercised at any time before or at
+maturity, and to Bermudan-style contracts, which can be exercised only at
+discrete dates. It would also be interesting to analyse how funding
+asymmetries affect the Greeks. On the numerical side, one could connect the
+present theory with its probabilistic counterpart through the nonlinear
+Feynman--Kac representation and the associated theory of backward stochastic
+differential equations, as developed by \cite{PardouxPeng1990,PardouxPeng1992}.
+
+
+\newpage
+
+\appendix
+\section{Appendix}
+For readability, standard background material from linear algebra, Fourier analysis,
+and functional analysis has been collected in this appendix. The main text focuses
+on the nonlinear pricing model, its reduction to a semilinear heat equation, and the
+resulting deterministic PDE analysis. For the standard functional-analytic and PDE
+background recorded below, we refer in particular to Evans \cite{EvansPDE},
+Br\'ezis \cite{Brezis2011} and \cite{Trench2003}.
+
+
+
+\subsection{Mathematical background}
+\subsubsection{A linear-algebra fact for symmetric positive definite matrices}
+
+The whitening step used in the reduction of the nonlinear Black-Scholes
+equation to a semilinear heat equation relies on the standard Cholesky
+factorization for symmetric positive definite matrices.
+
+\begin{proposition}[Cholesky factorization for symmetric positive definite matrices]
+\label{prop:cholesky_spd}
+Let $A\in\mathbb R^{d\times d}$ be symmetric positive definite. Then there
+exists an invertible lower triangular matrix $R$ with positive diagonal entries
+such that
+\[
+A = RR^\top.
+\]
+In particular, if $Q\in\mathbb R^{d\times d}$ is symmetric positive definite,
+then $\frac12 Q$ is also symmetric positive definite, so there exists an
+invertible matrix $L$ such that
+\[
+LL^\top = \frac12 Q.
+\]
+\end{proposition}
+
+
+
+To study diffusion and parabolic equations rigorously, we require several standard notions from functional analysis, particularly those concerning function spaces on $\mathbb{R}^n$ and on bounded domains $\Omega \subset \mathbb{R}^n$.
+This section records the functional-analytic background used repeatedly in the thesis, especially for $L^p$ and Sobolev spaces, weak derivatives, distributions, and Fourier analysis; standard references include Evans \cite{EvansPDE} and Br\'ezis \cite{Brezis2011}.
+
+\subsubsection{Metric and Normed Spaces}
+
+\begin{definition}[Metric Space]
+A \emph{metric space} is a set $X$ together with a function
+\[
+d : X \times X \to \mathbb{R},
+\]
+called a \emph{metric} (or \emph{distance function}), satisfying for all $x, y, z \in X$:
+\begin{enumerate}
+    \item $d(x, y) \ge 0$ and $d(x, y) = 0$ if and only if $x = y$, \hfill (non-negativity and identity)
+    \item $d(x, y) = d(y, x)$, \hfill (symmetry)
+    \item $d(x, z) \le d(x, y) + d(y, z)$. \hfill (triangle inequality)
+\end{enumerate}
+\end{definition}
+
+\begin{definition}[Normed Vector Space]
+A \emph{normed vector space} is a vector space $X$ over $\mathbb{C}$ (or $\mathbb{R}$) equipped with a function
+\[
+\|\cdot\| : X \to \mathbb{R},
+\]
+called a \emph{norm}, satisfying for all $x, y \in X$ and all scalars $\alpha \in \mathbb{C}$:
+\begin{enumerate}
+    \item $\|x\| \ge 0$ and $\|x\| = 0$ if and only if $x = 0$, \hfill (positive definiteness)
+    \item $\|\alpha x\| = |\alpha|\,\|x\|$, \hfill (homogeneity)
+    \item $\|x + y\| \le \|x\| + \|y\|$. \hfill (triangle inequality)
+\end{enumerate}
+\end{definition}
+
+Every normed vector space $(X, \|\cdot\|)$ induces a metric via
+\[
+d(x, y) = \|x - y\|, \quad x, y \in X.
+\]
+
+\begin{definition}[Inner Product Space]
+An \emph{inner product space} is a vector space $X$ over $\mathbb{C}$ endowed with a function
+\[
+\langle \cdot, \cdot \rangle : X \times X \to \mathbb{C},
+\]
+called an \emph{inner product}, satisfying for all $x, y, x_1, x_2, y_1, y_2 \in X$ and $a, b \in \mathbb{C}$:
+\begin{enumerate}
+    \item $\langle x, x \rangle \ge 0$ and $\langle x, x \rangle = 0$ iff $x = 0$, \hfill (positive definiteness)
+    \item $\langle x, y \rangle = \overline{\langle y, x \rangle}$, \hfill (conjugate symmetry)
+    \item $\langle a x_1 + b x_2, y \rangle = a \langle x_1, y \rangle + b \langle x_2, y \rangle$, \hfill (linearity in the first argument)
+    \item $\langle x, a y_1 + b y_2 \rangle = \overline{a}\,\langle x, y_1 \rangle + \overline{b}\,\langle x, y_2 \rangle$. \hfill (conjugate linearity)
+\end{enumerate}
+The associated norm is given by $\|x\| = \sqrt{\langle x, x \rangle}$.
+\end{definition}
+
+\begin{definition}[Cauchy and Convergent Sequences]
+Let $(X, d)$ be a metric space.
+\begin{itemize}
+    \item A sequence $(x_n)$ is \emph{Cauchy} if for every $\varepsilon > 0$ there exists $N \in \mathbb{N}$ such that
+    $d(x_m, x_n) < \varepsilon$ for all $m, n \ge N$.
+    \item A sequence $(x_n)$ \emph{converges} to $x \in X$ if for every $\varepsilon > 0$ there exists $N \in \mathbb{N}$ such that
+    $d(x_n, x) < \varepsilon$ for all $n \ge N$.
+\end{itemize}
+\end{definition}
+
+\begin{definition}[Complete Normed Space]
+A normed vector space $X$ is \emph{complete} if every Cauchy sequence in $X$ converges to a limit in $X$.
+\end{definition}
+
+A complete normed space is a \emph{Banach space}, while a complete inner product space is a \emph{Hilbert space}.
+
+\begin{theorem}[Banach fixed-point theorem]
+\label{thm:banach_fixed_point}
+Let $(X,d)$ be a complete metric space, and let $T:X\to X$ satisfy
+\[
+d(Tx,Ty)\le k\,d(x,y)
+\qquad \text{for all } x,y\in X,
+\]
+for some constant $k\in[0,1)$. Then $T$ has a unique fixed point $x_*\in X$.
+Moreover, for every starting point $x_0\in X$, the iterates defined by
+\[
+x_{n+1}=Tx_n,
+\qquad n\ge 0,
+\]
+converge to $x_*$.
+\end{theorem}
+
+\begin{proof}
+Fix $x_0\in X$ and define the sequence $(x_n)$ by $x_{n+1}=Tx_n$.
+Since $T$ is a contraction,
+\[
+d(x_{n+1},x_n)=d(Tx_n,Tx_{n-1})\le k\,d(x_n,x_{n-1})
+\qquad \text{for } n\ge 1.
+\]
+By induction this gives
+\[
+d(x_{n+1},x_n)\le k^n d(x_1,x_0)
+\qquad \text{for all } n\ge 0.
+\]
+
+Now let $m>n$. By the triangle inequality,
+\[
+d(x_m,x_n)
+\le \sum_{j=n}^{m-1} d(x_{j+1},x_j)
+\le d(x_1,x_0)\sum_{j=n}^{m-1} k^j.
+\]
+Since $0\le k<1$, the geometric-series formula yields
+\[
+d(x_m,x_n)
+\le d(x_1,x_0)\,\frac{k^n-k^m}{1-k}
+\le \frac{k^n}{1-k}\,d(x_1,x_0).
+\]
+The right-hand side tends to $0$ as $n\to\infty$, uniformly in $m>n$, so
+$(x_n)$ is a Cauchy sequence. Because $X$ is complete, there exists
+$x_*\in X$ such that $x_n\to x_*$.
+
+It remains to show that $x_*$ is a fixed point. Using again that $T$ is a
+contraction,
+\[
+d(Tx_*,x_*)
+\le d(Tx_*,Tx_n)+d(Tx_n,x_*)
+\le k\,d(x_*,x_n)+d(x_{n+1},x_*).
+\]
+Letting $n\to\infty$ gives $d(Tx_*,x_*)=0$, hence $Tx_*=x_*$.
+
+To prove uniqueness, suppose $y_*\in X$ is another fixed point of $T$.
+Then
+\[
+d(x_*,y_*)=d(Tx_*,Ty_*)\le k\,d(x_*,y_*).
+\]
+Therefore $(1-k)d(x_*,y_*)\le 0$. Since $1-k>0$ and distances are
+nonnegative, it follows that $d(x_*,y_*)=0$, so $x_*=y_*$. Thus the fixed
+point is unique, and the iteration from any initial point converges to it.
+\end{proof}
+
+\begin{definition}[Dense Subset]
+Let $(X, d)$ be a metric space. A subset $A \subset X$ is said to be \emph{dense} in $X$ if for every
+$x \in X$ and every $\varepsilon > 0$ there exists $a \in A$ such that
+\[
+d(x, a) < \varepsilon.
+\]
+Equivalently, $A$ is dense in $X$ if the closure of $A$ equals $X$, that is,
+\[
+\overline{A} = X.
+\]
+\end{definition}
+
+\subsubsection{Spaces of Continuous Functions}
+
+Let $\Omega \subset \mathbb{R}^n$ be an open or bounded domain. We collect several function spaces that frequently arise in the study of parabolic and elliptic PDEs.
+
+\begin{definition}[$C(\Omega)$]
+The space $C(\Omega)$ consists of all real- or complex-valued functions
+\[
+f : \Omega \to \mathbb{C}
+\]
+that are continuous at every point of $\Omega$.
+\end{definition}
+
+\begin{definition}[$C_b(\Omega)$]
+The space $C_b(\Omega)$ denotes the set of continuous functions on $\Omega$ that are \emph{bounded}, i.e.,
+\[
+\|f\|_\infty := \sup_{x \in \Omega} |f(x)| < \infty.
+\]
+Equipped with the uniform norm $\|\cdot\|_\infty$, the space $C_b(\Omega)$ is a Banach space.
+\end{definition}
+
+\begin{definition}[$C_c(\Omega)$]
+The space $C_c(\Omega)$ consists of continuous functions whose support is compact and contained in $\Omega$:
+\[
+C_c(\Omega) := \{f \in C(\Omega) : \operatorname{supp}(f) \subset\subset \Omega\}.
+\]
+This space is dense in many important function spaces, including $L^p(\Omega)$ for $1 \le p < \infty$.
+\end{definition}
+
+\begin{definition}[$C^k(\Omega)$]
+For an integer $k \ge 1$, the space $C^k(\Omega)$ consists of functions whose partial derivatives of all orders up to $k$ exist and are continuous on $\Omega$.
+We equip $C^k(\Omega)$ with the norm
+\[
+\|f\|_{C^k} := \sum_{|\alpha| \le k} \sup_{x \in \Omega} |D^\alpha f(x)|.
+\]
+\end{definition}
+
+\begin{definition}[$C^\infty(\Omega)$]
+The space $C^\infty(\Omega)$ consists of functions that are infinitely differentiable on $\Omega$.
+\end{definition}
+
+\begin{definition}[$C_c^\infty(\Omega)$ - Test Functions]
+The space $C_c^\infty(\Omega)$ consists of smooth functions with compact support in $\Omega$.
+\end{definition}
+
+
+
+\subsection{Lebesgue Spaces \texorpdfstring{$L^p$}{Lp}}
+
+Lebesgue spaces are among the most important examples of Banach spaces, forming the basis of modern analysis and PDE theory.
+
+\begin{definition}[Lebesgue Space]
+Let $\Omega \subset \mathbb{R}^n$ be a measurable domain with a positive measure $\mu$, and let $p > 0$.
+Under the convention that functions equal almost everywhere are identified, the \emph{Lebesgue space} $L^p(\Omega)$ is defined as
+\[
+L^p(\Omega) = \left\{ f \text{ measurable on } \Omega :
+\|f\|_{L^p(\Omega)} = \left( \int_{\Omega} |f(x)|^p \, d\mu(x) \right)^{1/p} < \infty \right\}.
+\]
+For $p = \infty$, $L^\infty(\Omega)$ consists of all measurable, essentially bounded functions with
+\[
+\|f\|_{L^\infty(\Omega)} = \operatorname*{ess\,sup}_{x \in \Omega} |f(x)| < \infty.
+\]
+\end{definition}
+
+\begin{definition}[Lebesgue Conjugate]
+For $p \in [1, \infty]$, the \emph{conjugate exponent} $p'$ is defined by
+\[
+\frac{1}{p} + \frac{1}{p'} = 1, \qquad
+\text{that is,} \quad
+p' =
+\begin{cases}
+\dfrac{p}{p-1}, & 1 < p < \infty, \\[0.5em]
+\infty, & p = 1.
+\end{cases}
+\]
+\end{definition}
+
+\begin{remark}
+The space $L^2(\Omega)$ is a Hilbert space with inner product
+\[
+\langle f, g \rangle = \int_{\Omega} f(x)\,\overline{g(x)}\,dx,
+\]
+and corresponding norm $\|f\|_{L^2(\Omega)} = \sqrt{\langle f, f \rangle}$.
+\end{remark}
+
+
+
+\begin{theorem}[Hölder's Inequality]
+Let $1 \le p, q \le \infty$ satisfy $\frac{1}{p} + \frac{1}{q} = 1$.
+Then for all $f \in L^p(\Omega)$ and $g \in L^q(\Omega)$,
+\[
+\int_{\Omega} |f(x)g(x)| \, d\mu(x)
+\le \|f\|_{L^p(\Omega)} \, \|g\|_{L^q(\Omega)}.
+\]
+\end{theorem}
+
+\begin{theorem}[Minkowski's Inequality]
+Let $1 \le p \le \infty$ and $f, g \in L^p(\Omega)$. Then
+\[
+\|f + g\|_{L^p(\Omega)} \le \|f\|_{L^p(\Omega)} + \|g\|_{L^p(\Omega)}.
+\]
+\end{theorem}
+
+\begin{theorem}[Gronwall's Inequality]
+Let $T>0$, let $u:[0,T]\to[0,\infty)$ be continuous, and let
+$\alpha\in L^1(0,T)$ and $\beta\in L^1(0,T)$ with $\beta\ge 0$ almost everywhere.
+If
+\[
+u(t) \le \alpha(t) + \int_0^t \beta(s)\,u(s)\,ds,
+\qquad 0\le t\le T,
+\]
+then
+\[
+u(t) \le \alpha(t) + \int_0^t \alpha(s)\,\beta(s)
+\exp\!\left(\int_s^t \beta(r)\,dr\right) ds,
+\qquad 0\le t\le T.
+\]
+In particular, if $\alpha(t)\equiv C\ge 0$, then
+\[
+u(t) \le C\exp\!\left(\int_0^t \beta(s)\,ds\right),
+\qquad 0\le t\le T.
+\]
+\end{theorem}
+
+\begin{proof}
+Define $v(t) := \int_0^t \beta(s)\,u(s)\,ds$, so that $v(0)=0$ and
+\[
+    v'(t) = \beta(t)\,u(t) \le \beta(t)\,\alpha(t) + \beta(t)\,v(t)
+    \quad \text{  on }(0,T).
+\]
+Multiplying by the integrating factor
+$\mu(t) := \exp\!\left(-\int_0^t \beta(r)\,dr\right)$ gives
+\[
+    \frac{d}{dt}\bigl[\mu(t)\,v(t)\bigr] \le \mu(t)\,\alpha(t)\,\beta(t)
+    \quad \text{  on }(0,T).
+\]
+Integrating from $0$ to $t$ and using $v(0)=0$, we obtain
+\[
+    \mu(t)\,v(t) \le \int_0^t \mu(s)\,\alpha(s)\,\beta(s)\,ds.
+\]
+Hence
+\[
+    v(t) \le \frac{1}{\mu(t)}\int_0^t \mu(s)\,\alpha(s)\,\beta(s)\,ds
+    = \int_0^t \alpha(s)\,\beta(s)\exp\!\left(\int_s^t \beta(r)\,dr\right)\,ds.
+\]
+Substituting this into $u(t) \le \alpha(t) + v(t)$ yields
+\[
+    u(t) \le \alpha(t) + \int_0^t \alpha(s)\,\beta(s)
+    \exp\!\left(\int_s^t \beta(r)\,dr\right)\,ds,
+\]
+which is exactly the stated bound. In the special case $\alpha(t)\equiv C$, this reduces to
+\[
+    u(t) \le C\exp\!\left(\int_0^t \beta(s)\,ds\right).
+\]
+\end{proof}
+
+
+
+
+\begin{remark}
+For $\alpha, \beta > 0$ and measurable $f$, the Lebesgue norms satisfy
+\[
+\|f^{\alpha}\|_{L^{\beta}(\Omega)}
+= \left( \int_{\Omega} |f|^{\alpha \beta} \, dx \right)^{1/\beta}
+= \|f\|_{L^{\alpha \beta}(\Omega)}^{\alpha}.
+\]
+\end{remark}
+
+
+
+\begin{theorem}
+\label{thm:Cc-in-Lp}
+$C_c^\infty(\Omega)$ is dense in $L^p(\Omega)$ for every $1 \le p < \infty$.
+\end{theorem}
+
+A standard proof combines truncation, approximation by continuous compactly supported functions, and mollification; see, for instance, Evans \cite{EvansPDE} or Br\'ezis \cite{Brezis2011}.
+
+\begin{comment}
+\begin{proposition}
+Let $u$ be a bounded function with compact support. If $u$ is Riemann
+integrable, then $u$ is also Lebesgue integrable, and its Riemann integral
+coincides with its Lebesgue integral.
+\end{proposition}
+\end{comment}
+
+
+\subsubsection{Sobolev Spaces \texorpdfstring{\(W^{k,p}\)}{Wk,p}}
+
+Another fundamental class of Banach spaces is formed by the \emph{Sobolev spaces}, which play a central role in the analysis of partial differential equations; see Evans \cite{EvansPDE} and Br\'ezis \cite{Brezis2011}.
+
+\begin{definition}[Sobolev Space]
+Let $\Omega \subset \mathbb{R}^n$ be an open domain.
+For an integer $k \in \mathbb{N}$ and $1 \le p \le \infty$, the \emph{Sobolev space} $W^{k,p}(\Omega)$ is defined as the set of all locally integrable functions $f : \Omega \to \mathbb{R}$ such that for every multi-index $\alpha$ with $|\alpha| \le k$, the weak derivative $\partial_x^{\alpha} f$ exists and belongs to $L^p(\Omega)$.
+The norm is given by
+\[
+\|u\|_{W^{k,p}(\Omega)} =
+\begin{cases}
+\left( \displaystyle\sum_{|\alpha|\le k} \int_{\Omega} |\partial_x^{\alpha} u|^p \, dx \right)^{1/p}, & 1 \le p < \infty, \\[1em]
+\displaystyle\sum_{|\alpha|\le k} \operatorname*{ess\,sup}_{x \in \Omega} |\partial_x^{\alpha} u(x)|, & p = \infty.
+\end{cases}
+\]
+\end{definition}
+
+\begin{definition}[Homogeneous Sobolev Space]
+The \emph{homogeneous Sobolev space}, denoted $\dot{W}^{k,p}(\Omega)$, is defined as the space of functions for which all weak derivatives of order exactly $k$ belong to $L^p(\Omega)$, with norm
+\[
+\|u\|_{\dot{W}^{k,p}(\Omega)} =
+\begin{cases}
+\left( \displaystyle\int_{\Omega} |\nabla^k u|^p \, dx \right)^{1/p}, & 1 \le p < \infty, \\[1em]
+\operatorname*{ess\,sup}_{x \in \Omega} |\nabla^k u(x)|, & p = \infty.
+\end{cases}
+\]
+\end{definition}
+
+\begin{remark}
+If $p = 2$, the Sobolev space $W^{k,2}(\Omega)$ is a Hilbert space, and it is customary to write
+\[
+H^k(\Omega) = W^{k,2}(\Omega),
+\qquad
+\dot{H}^k(\Omega) = \dot{W}^{k,2}(\Omega),
+\qquad
+H^0(\Omega) = \dot{H}^0(\Omega) = L^2(\Omega).
+\]
+\end{remark}
+
+\begin{proposition}[Sobolev truncation]
+\label{prop:sobolev_truncation}
+Let $1 \le p < \infty$, let $u \in W^{1,p}(\R^n)$, and let
+$\Phi:\R\to\R$ be Lipschitz with $\Phi(0)=0$. Then $\Phi\circ u \in W^{1,p}(\R^n)$ and
+\[
+\nabla(\Phi\circ u)=\Phi'(u)\,\nabla u
+\qquad\text{  in }\R^n,
+\]
+where $\Phi'$ is understood at points of differentiability of $\Phi$, which
+exist almost everywhere. In particular,
+\[
+u^+ := \max(u,0),
+\qquad
+u^- := \max(-u,0)
+\]
+belong to $W^{1,p}(\R^n)$, and
+\[
+\nabla u^+ = \mathbf{1}_{\{u>0\}}\,\nabla u,
+\qquad
+\nabla u^- = -\mathbf{1}_{\{u<0\}}\,\nabla u
+\qquad\text{  in }\R^n.
+\]
+\end{proposition}
+
+\begin{proof}
+Choose a sequence $(u_k)\subset C^\infty(\R^n)\cap W^{1,p}(\R^n)$ such that
+$u_k\to u$ in $W^{1,p}(\R^n)$; for example, one may obtain such an approximation by a standard density and mollification argument. Since $\Phi$ is Lipschitz and $\Phi(0)=0$,
+we have $|\Phi(s)|\le \operatorname{Lip}(\Phi)\,|s|$, hence
+$\Phi(u_k)\to \Phi(u)$ in $L^p(\R^n)$. For smooth $u_k$, the classical chain
+rule gives
+\[
+\nabla(\Phi(u_k))=\Phi'(u_k)\,\nabla u_k
+\qquad\text{  in }\R^n.
+\]
+Since $|\Phi'|\le \operatorname{Lip}(\Phi)$ almost everywhere, the gradients
+are bounded in $L^p(\R^n)$; passing to the limit in the weak derivative
+identity yields $\Phi(u)\in W^{1,p}(\R^n)$ with the stated gradient formula.
+
+For $\Phi(s)=s^+$ and $\Phi(s)=s^-$, one has $\Phi'(s)=\mathbf{1}_{\{s>0\}}$
+and $\Phi'(s)=-\mathbf{1}_{\{s<0\}}$ for almost every $s\in\R$, which gives
+the formulas for $\nabla u^+$ and $\nabla u^-$.
+\end{proof}
+
+
+
+\subsubsection{Inequalities}
+
+We record the inequalities used later, especially the Gagliardo-Nirenberg interpolation estimate.
+
+
+
+
+
+
+\begin{theorem}[Young's Inequality]
+Let $p, q \in (1, \infty)$ with $\dfrac{1}{p} + \dfrac{1}{q} = 1$. Then for all
+$a, b \geq 0$,
+\begin{equation}
+    ab \leq \frac{a^p}{p} + \frac{b^q}{q}.
+\end{equation}
+Equality holds if and only if $a^p = b^q$.
+\end{theorem}
+
+
+\begin{theorem}[Gagliardo-Nirenberg Inequality]
+Let $1 \le q \le \infty$, let $j,m\in\mathbb{N}_0$ with $j<m$, and let
+$1\le r\le \infty$, $p\ge 1$, and $\theta\in[0,1]$ satisfy
+\[
+\frac{1}{p}=\frac{j}{n}+\theta\!\left(\frac{1}{r}-\frac{m}{n}\right)+\frac{1-\theta}{q},
+\qquad
+\frac{j}{m}\le \theta\le 1.
+\]
+Then there exists a constant $C>0$, depending only on
+$j,m,n,q,r,\theta$, such that
+\[
+\|D^j u\|_{L^p(\mathbb{R}^n)}
+\le
+C\,\|D^m u\|_{L^r(\mathbb{R}^n)}^{\theta}
+\,\|u\|_{L^q(\mathbb{R}^n)}^{1-\theta}
+\]
+for every $u\in L^q(\mathbb{R}^n)$ with $D^m u\in L^r(\mathbb{R}^n)$.
+
+\end{theorem}
+
+\subsection{Distributions and weak derivatives}
+\label{app:distributions}
+
+Let $\Omega \subseteq \mathbb{R}^n$ be open.
+We denote by $C_0^\infty(\Omega)=C_c^\infty(\Omega)$ the space of infinitely differentiable functions with compact support in $\Omega$. The basic notions recalled here are standard; see Evans \cite{EvansPDE} and Br\'ezis \cite{Brezis2011}.
+
+\begin{definition}[Distributions]
+The space of \emph{distributions} on $\Omega$, denoted $\mathcal{D}'(\Omega)$, is the space of all continuous linear functionals
+\[
+u : C_0^\infty(\Omega) \to \mathbb{R}, \qquad
+\varphi \mapsto \langle u, \varphi \rangle.
+\]
+For $f \in L^1_{\mathrm{loc}}(\Omega)$, the map
+\[
+\langle f, \varphi \rangle = \int_{\Omega} f(x)\varphi(x)\,dx
+\]
+defines a \emph{regular distribution}.
+\end{definition}
+
+\begin{definition}[Distributional Derivative]
+For $u \in \mathcal{D}'(\Omega)$ and a multi-index $\alpha$, the \emph{distributional derivative} $\partial_x^{\alpha} u$ is defined by
+\[
+\langle \partial_x^{\alpha} u, \varphi \rangle
+= (-1)^{|\alpha|} \langle u, \partial_x^{\alpha} \varphi \rangle,
+\qquad \forall \varphi \in C_0^\infty(\Omega).
+\]
+\end{definition}
+
+\begin{definition}[Convergence in the Sense of Distributions]
+A sequence $(u_n) \subset \mathcal{D}'(\Omega)$ is said to \emph{converge to} $u \in \mathcal{D}'(\Omega)$ \emph{in the sense of distributions} if and only if
+\[
+\langle u_n, \varphi \rangle \longrightarrow \langle u, \varphi \rangle
+\quad \text{for every } \varphi \in C_0^\infty(\Omega).
+\]
+Equivalently, $u_n \xrightarrow{\mathcal{D}'(\Omega)} u$ in the weak-$*$ topology induced by $C_0^\infty(\Omega)$.
+\end{definition}
+
+\subsubsection{Fourier transform and the Schwartz space}
+
+In the analysis of the heat equation and related parabolic PDEs, the natural starting point for the Fourier transform is the Schwartz space. This choice avoids integrability and differentiability issues, since Schwartz functions are smooth and decay faster than any power at infinity, together with all of their derivatives; see, for example, Evans \cite{EvansPDE} and Br\'ezis \cite{Brezis2011}.
+
+\begin{definition}[Rapidly decreasing function]
+Let $\langle x\rangle := (1+|x|^2)^{1/2}$ for $x\in\mathbb R^n$.
+A function $f:\mathbb R^n\to\mathbb C$ is said to be \emph{rapidly decreasing} if
+\[
+\sup_{x\in\mathbb R^n} \langle x\rangle^N |f(x)| < \infty
+\qquad \text{for every } N\ge 0.
+\]
+\end{definition}
+
+\begin{definition}[Schwartz space]
+The \emph{Schwartz space} $\mathcal S(\mathbb R^n)$ is the set of all functions
+$f\in C^\infty(\mathbb R^n)$ such that for every pair of multi-indices
+$\alpha,\beta\in\mathbb N_0^n$,
+\[
+\sup_{x\in\mathbb R^n} |x^\alpha \partial^\beta f(x)| < \infty.
+\]
+Equivalently, every derivative of $f$ is rapidly decreasing.
+\end{definition}
+
+\noindent
+Here, for $\alpha=(\alpha_1,\dots,\alpha_n)$ and $\beta=(\beta_1,\dots,\beta_n)$, we use the standard multi-index notation
+\[
+x^\alpha = x_1^{\alpha_1}\cdots x_n^{\alpha_n},
+\qquad
+\partial^\beta
+=
+\partial_{x_1}^{\beta_1}\cdots \partial_{x_n}^{\beta_n}.
+\]
+
+\begin{definition}[Fourier transform on $\mathcal S(\mathbb R^n)$]
+For $f\in\mathcal S(\mathbb R^n)$, its \emph{Fourier transform} is defined by
+\begin{equation}
+\widehat f(\xi)
+:=
+\mathcal Ff(\xi)
+=
+\int_{\mathbb R^n} f(x)\,e^{-ix\cdot \xi}\,dx,
+\qquad \xi\in\mathbb R^n.
+\label{eq:fourier_transform_schwartz}
+\end{equation}
+\end{definition}
+
+This integral is absolutely convergent for every $\xi\in\mathbb R^n$, since $f\in\mathcal S(\mathbb R^n)\subset L^1(\mathbb R^n)$.
+Moreover, one may differentiate under the integral sign, and repeated integration by parts is justified because all derivatives of $f$ decay rapidly. As a consequence, $\widehat f$ is again a Schwartz function.
+
+\begin{proposition}[Invariance of the Schwartz space]
+If $f\in\mathcal S(\mathbb R^n)$, then $\widehat f\in\mathcal S(\mathbb R^n)$.
+Moreover, the inverse transform is given by
+\begin{equation}
+f(x)=\frac{1}{(2\pi)^n}\int_{\mathbb R^n}\widehat f(\xi)\,e^{ix\cdot\xi}\,d\xi,
+\qquad x\in\mathbb R^n.
+\label{eq:inverse_fourier_schwartz}
+\end{equation}
+Hence $\mathcal F:\mathcal S(\mathbb R^n)\to\mathcal S(\mathbb R^n)$ is a bijection.
+\end{proposition}
+
+\begin{proof}[Idea of the proof]
+Since $f\in\mathcal S(\mathbb R^n)$, the integral \eqref{eq:fourier_transform_schwartz} is absolutely convergent. Differentiating with respect to $\xi$ gives
+\[
+\partial_\xi^\alpha \widehat f(\xi)
+=
+\int_{\mathbb R^n} (-ix)^\alpha f(x)e^{-ix\cdot\xi}\,dx,
+\]
+which is again well defined because $x^\alpha f(x)\in L^1(\mathbb R^n)$.
+On the other hand, multiplying by powers of $\xi$ corresponds, after integration by parts, to differentiating $f$:
+\[
+\xi^\beta \widehat f(\xi)
+=
+\mathcal F\bigl[(i\partial_x)^\beta f\bigr](\xi)
+\]
+up to harmless sign conventions. Since every derivative $\partial^\beta f$ also belongs to $\mathcal S(\mathbb R^n)$, all seminorms
+\[
+\sup_{\xi\in\mathbb R^n} |\xi^\beta \partial_\xi^\alpha \widehat f(\xi)|
+\]
+are finite, proving that $\widehat f\in\mathcal S(\mathbb R^n)$.
+The inversion formula \eqref{eq:inverse_fourier_schwartz} is standard on $\mathcal S(\mathbb R^n)$.
+\end{proof}
+
+\begin{remark}[Why $\mathcal S(\mathbb R^n)$ is the natural starting point]
+The Schwartz space is the ideal class for Fourier analysis in PDEs:
+\begin{itemize}
+\item functions and all derivatives decay rapidly, so the Fourier integral is absolutely convergent;
+\item differentiation under the integral sign is justified;
+\item integration by parts produces no boundary terms at infinity;
+\item the Fourier transform preserves the class $\mathcal S(\mathbb R^n)$.
+\end{itemize}
+For these reasons, Fourier identities are first proved on $\mathcal S(\mathbb R^n)$ and then extended, by density or duality, to larger spaces such as $L^2(\mathbb R^n)$ and the space of tempered distributions $\mathcal S'(\mathbb R^n)$.
+\end{remark}
+
+
+\subsubsection{Distributional inequalities}
+
+\begin{theorem}[Kato's Inequality]
+Let $u \in L^1_{\mathrm{loc}}(\Omega)$, where $\Omega \subseteq \mathbb{R}^n$ is an open
+set, and suppose that $\Delta u \in L^1_{\mathrm{loc}}(\Omega)$ in the sense of
+distributions. Then
+\begin{equation}
+    \Delta |u| \geq \operatorname{Re}\!\left(\operatorname{sgn}(u)\, \Delta u\right)
+    \quad \text{in } \mathcal{D}'(\Omega),
+\end{equation}
+where $\operatorname{sgn}(u)(x) = \overline{u(x)}/|u(x)|$ for $u(x) \neq 0$ and $0$
+otherwise. Equivalently, for any non-negative test function
+$\varphi \in C_c^\infty(\Omega)$,
+\begin{equation}
+    \int_\Omega |u|\, \Delta\varphi \, dx
+    \geq \int_\Omega \operatorname{Re}\!\left(\operatorname{sgn}(u)\, \Delta u\right)
+    \varphi \, dx.
+\end{equation}
+\end{theorem}
+
+\begin{remark}
+In the real-valued case, the inequality reduces to
+\begin{equation}
+    \Delta |u| \geq \operatorname{sgn}(u)\, \Delta u \quad \text{in } \mathcal{D}'(\Omega).
+\end{equation}
+\end{remark}
+
+\begin{proposition}[Parabolic Kato inequality]
+Let $\Omega\subseteq\mathbb{R}^n$ be open, $T>0$, and set
+$Q=\Omega\times(0,T)$. Suppose
+$u\in L^1_{\mathrm{loc}}(Q)$ with
+$\partial_t u,\,\nabla u,\,\Delta u\in L^1_{\mathrm{loc}}(Q)$.
+Then
+\[
+  \partial_t|u|-\Delta|u|
+  \;\le\;
+  \operatorname{sign}(u)\!\left(\partial_t u-\Delta u\right)
+  \quad\text{in }\mathcal{D}'(Q),
+\]
+\end{proposition}
+
+
+\begin{proof}
+For \(\varepsilon>0\), define
+\[
+\Phi_\varepsilon(s):=\sqrt{s^2+\varepsilon^2},
+\qquad
+\phi_\varepsilon(s):=\Phi_\varepsilon'(s)=\frac{s}{\sqrt{s^2+\varepsilon^2}}.
+\]
+Then \(\Phi_\varepsilon\in C^\infty(\mathbb R)\) and
+\[
+\Phi_\varepsilon''(s)=\phi_\varepsilon'(s)=\frac{\varepsilon^2}{(s^2+\varepsilon^2)^{3/2}}\ge 0.
+\]
+By the chain rule,
+\[
+\partial_t \Phi_\varepsilon(u)=\phi_\varepsilon(u)\partial_t u,
+\]
+and
+\[
+\Delta \Phi_\varepsilon(u)
+=
+\phi_\varepsilon(u)\Delta u+\phi_\varepsilon'(u)|\nabla u|^2.
+\]
+Therefore
+\[
+\partial_t \Phi_\varepsilon(u)-\Delta \Phi_\varepsilon(u)
+=
+\phi_\varepsilon(u)\bigl(\partial_t u-\Delta u\bigr)
+-\phi_\varepsilon'(u)|\nabla u|^2
+\le
+\phi_\varepsilon(u)\bigl(\partial_t u-\Delta u\bigr).
+\]
+Testing against a nonnegative \(\psi\in C_c^\infty(Q)\) and letting \(\varepsilon\downarrow 0\), using
+\[
+\Phi_\varepsilon(u)\to |u|,
+\qquad
+\phi_\varepsilon(u)\to \operatorname{sign}(u),
+\qquad
+|\phi_\varepsilon(u)|\le 1,
+\]
+yields\footnote{By convergence theorems.}
+\[
+\partial_t |u|-\Delta |u|
+\le
+\operatorname{sign}(u)\bigl(\partial_t u-\Delta u\bigr)
+\qquad\text{in }\mathcal D'(Q).
+\]
+\end{proof}
+
+\begin{remark}[Extension to $L^2$ and tempered distributions]
+The Fourier transform extends uniquely from $\mathcal S(\mathbb R^n)$ to a unitary operator on $L^2(\mathbb R^n)$ (up to the normalization convention). It also extends by duality to the space of tempered distributions $\mathcal S'(\mathbb R^n)$, defined by
+\[
+\langle \widehat T,\varphi\rangle := \langle T,\widehat\varphi\rangle,
+\qquad \varphi\in\mathcal S(\mathbb R^n).
+\]
+This is the framework used when Fourier methods are applied to weak solutions and fundamental solutions of PDEs.
+\end{remark}
+
+
+
+
+
+
+
+\clearpage
+\begin{thebibliography}{99}\setlength{\itemsep}{0.2em}
+\bibitem{BurgardKjaer2011}
+C.~Burgard and M.~Kjaer,
+\newblock PDE representations of derivatives with bilateral counterparty risk and funding costs,
+\newblock \emph{The Journal of Credit Risk} 7(3) (2011), 1-19.
+
+\bibitem{Piterbarg2010}
+V.~Piterbarg,
+\newblock Funding beyond discounting: collateral agreements and derivatives pricing,
+\newblock \emph{Risk} 23(2) (2010), 97-102.
+
+\bibitem{BlackScholes1973}
+F.~Black and M.~Scholes,
+\newblock The pricing of options and corporate liabilities,
+\newblock \emph{Journal of Political Economy} 81 (1973), 637-654.
+
+\bibitem{Merton1973}
+R.~C.~Merton,
+\newblock Theory of rational option pricing,
+\newblock \emph{Bell Journal of Economics and Management Science} 4 (1973), 141-183.
+
+\bibitem{DuffieSingleton1999}
+D.~Duffie and K.~Singleton,
+\newblock Modeling term structures of defaultable bonds,
+\newblock \emph{Review of Financial Studies} 12 (1999), 687-720.
+
+\bibitem{BieleckiRutkowski2002}
+T.~R.~Bielecki and M.~Rutkowski,
+\newblock \emph{Credit Risk: Modeling, Valuation and Hedging},
+\newblock Springer, 2002.
+
+\bibitem{Wilmott2006}
+P.~Wilmott,
+\newblock \emph{Paul Wilmott on Quantitative Finance},
+\newblock 2nd ed., John Wiley \& Sons, 2006.
+
+\bibitem{QuittnerSouplet2007}
+P.~Quittner and P.~Souplet,
+\newblock \emph{Superlinear Parabolic Problems: Blow-up, Global Existence and Steady States},
+\newblock Birkh\"auser, 2007.
+
+\bibitem{Vazquez2007}
+J.~L.~V\'azquez,
+\newblock \emph{The Porous Medium Equation: Mathematical Theory},
+\newblock Oxford University Press, 2007.
+
+\bibitem{HenryLabordere2012}
+P.~Henry-Labord\`ere,
+\newblock \emph{Counterparty Risk Valuation: A Markovian Approach},
+\newblock Chapman \& Hall/CRC, 2012.
+
+
+\bibitem{BrigoMoriniPallavicini2013}
+D.~Brigo, M.~Morini, and A.~Pallavicini,
+\newblock \emph{Counterparty Credit Risk, Collateral and Funding: With Pricing Cases for All Asset Classes},
+\newblock Wiley, 2013.
+
+\bibitem{GuyonHenryLabordere2013}
+J.~Guyon and P.~Henry-Labord\`ere,
+\newblock \emph{Nonlinear Option Pricing},
+\newblock CRC Press, 2013.
+
+\bibitem{Fujita1966}
+H.~Fujita,
+\newblock On the blowing up of solutions of the Cauchy problem for $u_t=\Delta u+u^{1+\alpha}$,
+\newblock \emph{Journal of the Faculty of Science, University of Tokyo, Sect.~I} 13(2) (1966), 109-124.
+
+\bibitem{PardouxPeng1990}
+E.~Pardoux and S.~Peng,
+\newblock Adapted solution of a backward stochastic differential equation,
+\newblock \emph{Systems \& Control Letters} 14(1) (1990), 55--61.
+
+\bibitem{PardouxPeng1992}
+E.~Pardoux and S.~Peng,
+\newblock Backward stochastic differential equations and quasilinear parabolic partial differential equations,
+\newblock in B.~L.~Rozovskii and R.~B.~Sowers (eds.), \emph{Stochastic Partial Differential Equations and Their Applications}, Lecture Notes in Control and Information Sciences, vol.~176, Springer, 1992, pp.~200--217.
+
+\bibitem{EvansPDE}
+L.~C.~Evans,
+\newblock \emph{Partial Differential Equations},
+\newblock 2nd ed., AMS, 2010.
+
+\bibitem{Brezis2011}
+H.~Br\'ezis,
+\newblock \emph{Functional Analysis, Sobolev Spaces and Partial Differential Equations},
+\newblock Springer, 2011.
+
+\bibitem{Trench2003}
+W.~F.~Trench,
+\newblock \emph{Introduction to Real Analysis},
+\newblock Prentice Hall/Pearson Education, 2003.
+
+\bibitem{Gilardi2014}
+G.~Gilardi,
+\newblock \emph{Analisi Tre},
+\newblock A textbook on Ordinary Differential Equations,
+\newblock 1st ed., McGraw-Hill Education, 2014.
+
+\bibitem{Schonbek1985}
+M.~E.~Schonbek,
+\newblock $L^2$ decay for weak solutions of the Navier-Stokes equations,
+\newblock \emph{Archive for Rational Mechanics and Analysis} 88 (1985), 209-222.
+
+\bibitem{VazquezHeat}
+J.~L.~V\'azquez,
+\newblock Smoothing and decay estimates for nonlinear diffusion equations,
+\newblock in \emph{Nonlinear Diffusion Equations and Their Equilibrium States}, Birkh\"auser, 1992.
+
+\bibitem{Gagliardo1958}
+E.~Gagliardo,
+\newblock Proprieta di alcune classi di funzioni in piu variabili,
+\newblock \emph{Ricerche di Matematica} 7 (1958), 102-137.
+
+\bibitem{Lions1969}
+J.-L.~Lions,
+\newblock \emph{Quelques Methodes de Resolution des Problemes aux Limites non Lineaires},
+\newblock Dunod / Gauthier-Villars, Paris, 1969.
+
+\bibitem{Nash1958}
+J.~Nash,
+\newblock Continuity of solutions of parabolic and elliptic equations,
+\newblock \emph{American Journal of Mathematics} 80 (1958), 931-954.
+
+\bibitem{Nirenberg1959}
+L.~Nirenberg,
+\newblock On elliptic partial differential equations,
+\newblock \emph{Annali della Scuola Normale Superiore di Pisa, Classe di
+Scienze} 13 (1959), 115-162.
+
+
+\bibitem{WilmottHowisonDewynne1995}
+P.~Wilmott, S.~Howison, and J.~Dewynne,
+\newblock \emph{The Mathematics of Financial Derivatives: A Student Introduction},
+\newblock Cambridge University Press, 1995.
+
+\bibitem{MusielaRutkowski2005}
+M.~Musiela and M.~Rutkowski,
+\newblock \emph{Martingale Methods in Financial Modelling},
+\newblock 2nd ed., Springer, 2005.
+
+\bibitem{Shreve2004}
+S.~E.~Shreve,
+\newblock \emph{Stochastic Calculus for Finance II: Continuous-Time Models},
+\newblock Springer, 2004.
+
+\bibitem{Glasserman2003}
+P.~Glasserman,
+\newblock \emph{Monte Carlo Methods in Financial Engineering},
+\newblock Springer, 2003.
+
+\bibitem{BarlesSoner1998}
+G.~Barles and H.~M.~Soner,
+\newblock Option pricing with transaction costs and a nonlinear {Black--Scholes} equation,
+\newblock \emph{Finance and Stochastics} 2(4) (1998), 369--397.
+
+\bibitem{AvellanedaLevyParas1995}
+M.~Avellaneda, A.~Levy, and A.~Par\'as,
+\newblock Pricing and hedging derivative securities in markets with uncertain volatilities,
+\newblock \emph{Applied Mathematical Finance} 2(2) (1995), 73--88.
+
+\bibitem{AnkudinovaEhrhardt2008}
+J.~Ankudinova and M.~Ehrhardt,
+\newblock On the numerical solution of nonlinear {Black--Scholes} equations,
+\newblock \emph{Computers \& Mathematics with Applications} 56(3) (2008), 799--812.
+
+\end{thebibliography}
+
+\end{document}
