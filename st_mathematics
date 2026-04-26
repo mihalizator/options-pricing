@@ -3,12 +3,12 @@
 \setlength{\cftbeforesecskip}{2pt}%space before each section entry
 \setlength{\cftbeforesubsecskip}{0pt}%pace before subsection entry
 \setlength{\cftbeforesubsubsecskip}{0pt}%space before subsubsection entry
-% -- Page layout --
+% - Page layout -
 \usepackage[margin=1in]{geometry}
 \setlength{\emergencystretch}{3em}
 \hbadness=3000
 \hfuzz=3pt
-% -- Math packages --
+% - Math packages -
 \usepackage{amsmath,amssymb,amsfonts}
 \usepackage{mathtools}
 \mathtoolsset{showonlyrefs}
@@ -28,7 +28,7 @@
   frame=single,
   keepspaces=true
 }
-%--Theorems--
+%-Theorems-
 \usepackage{amsthm}
 \theoremstyle{plain}
 \newtheorem{theorem}{Theorem}[section]
@@ -42,7 +42,7 @@
 
 \numberwithin{equation}{section}
 
-% -- Other utilities --
+% - Other utilities -
 \usepackage{bm}
 \usepackage{enumitem}
 \usepackage{graphicx}
@@ -54,10 +54,10 @@
 \setlength{\parindent}{0pt}
 \setlength{\parskip}{0.75\baselineskip}
 
-% -- Hyperlinks (load late) --
+% - Hyperlinks (load late) -
 \usepackage{hyperref}
 
-% -- Custom commands --
+% - Custom commands -
 % Disable \boxed{...} (remove boxes around formulas)
 \renewcommand{\boxed}[1]{#1}
 
@@ -113,9 +113,9 @@
 \vspace{1.2cm}
 
 \IfFileExists{cover_image.png}{%
-\includegraphics[width=0.5\textwidth]{cover_image.png}%
+\includegraphics[width=0.7\textwidth]{cover_image.png}%
 }{%
-\fbox{\parbox[c][0.18\textheight][c]{0.5\textwidth}{\centering Cover image placeholder}}%
+\fbox{\parbox[c][0.5\textheight][c]{0.5\textwidth}{\centering Cover image placeholder}}%
 }
 
 \vspace{0.8cm}
@@ -145,15 +145,16 @@ March 2026\par
 \markboth{Abstract}{}
 
 \begin{abstract}
-We study a nonlinear extension of the multi-asset Black-Scholes equation, which incorporates a state dependant valuation adjustments, such as funding and credit cost. Using a sequance of transformations we reduce the pricing problem to a semilinear heat equation.
+We study a nonlinear extension of the multi-asset Black-Scholes equation that incorporates state-dependent valuation adjustments, such as funding and credit costs. Using a sequence of transformations, we reduce the pricing problem to a semilinear heat equation.
 
 \[
 \partial_\tau u - \Delta u + f(u) = 0, \qquad (\tau,z)\in \mathbb{R}_+ \times \mathbb{R}^d.
 \]
-We focus our analysis on two piecewise-linear nonlinearities, which are meant to encode discounting on positive and negative mark-to-market values. Under a global Lipshitz condition, we establish global well-posedness and instantaneous $H^1$ regularization. In the dissipative case, we further obtain energy identities, $L^2$ contraction, and algebraic decay. In contrast, the non-dissipative model admits only Gronwall-type growth bounds together with exponentially weighted Gagliardo--Nirenberg estimates, highlighting the competition between funding effects and risk-free discounting. Finally, these analytical results are transported back to the original Black-Scholes variables.
+We focus our analysis on two piecewise-linear nonlinearities designed to encode discounting of positive and negative mark-to-market values. Under a global Lipschitz condition, we establish global well-posedness and instantaneous $H^1$ regularization. In the dissipative case, we further obtain energy identities, $L^2$ contraction, and algebraic decay. In contrast, the non-dissipative model admits only Gronwall-type growth bounds together with exponentially weighted Gagliardo-Nirenberg estimates, highlighting the competition between funding effects and risk-free discounting. Finally, these analytical results are transported back to the original Black-Scholes variables.
 
 \end{abstract}
 \clearpage
+
 
 \begingroup
 \setstretch{1.5}
@@ -162,15 +163,18 @@ We focus our analysis on two piecewise-linear nonlinearities, which are meant to
 \endgroup
 
 \clearpage
+
+
+
 \section{Introduction}
 \label{sec:intro}
-Derivative contracts are fundamental to the functioning of the modern financial market and the economy as a whole. They are used in almost every sector of the economy, along the entire supply chain, to hedge risk associated with interest rate/exchange rate fluctuations and input cost prices, such as petrol and gas, and to insure assets. More generally, a derivative is a contract between parties for the exchange of fixing some sort of financial terms ahead of time. This raises the question of how one is supposed to price these contracts. How much does the risk for the party exposed—like the issuer of a call option, for example-cost, and what is a fair compensation for that risk?
+Derivative contracts are fundamental to the functioning of modern financial markets and the economy as a whole. They are used in almost every sector of the economy, along the entire supply chain, to hedge risks associated with interest-rate and exchange-rate fluctuations and with input costs such as petrol and gas, and to insure assets. More generally, a derivative is a contract between parties that fixes certain financial terms in advance. This raises the question of how such contracts should be priced. How much should the risk borne by the exposed party—such as the issuer of a call option, for example—cost, and what constitutes fair compensation for that risk?
 
-The foundational theory of derivatives pricing comes from \cite{BlackScholes1973} and \cite{Merton1973}. They established that no-arbitrage pricing leads to a parabolic partial differential equation. At the core of their model is the idea that assets follow a geometric Brownian motion. Their approach argues that under the no-arbitrage condition, the price of a financial derivative should be the price of replicating a locally riskless portfolio, where by hedging you isolate the volatile ups and downs. And since it is riskless, you should be earning the market-wide risk-free rate. This approach yields an elegant linear pricing equation, which can also be easily extended to a multi-asset setting. Even though the underlying mathematics becomes more tricky since we are dealing with correlated Brownian motion, the core argument of constructing a replicating portfolio is the same.
+The foundational theory of derivatives pricing comes from \cite{BlackScholes1973} and \cite{Merton1973}. They established that no-arbitrage pricing leads to a parabolic partial differential equation. At the core of their model is the idea that assets follow geometric Brownian motion. Their approach argues that, under the no-arbitrage condition, the price of a financial derivative should equal the price of a replicating locally riskless portfolio, whereby hedging isolates the volatile fluctuations. Since the portfolio is riskless, it should earn the market-wide risk-free rate. This approach yields an elegant linear pricing equation, which can also be extended naturally to a multi-asset setting. Although the underlying mathematics becomes more subtle because one is dealing with correlated Brownian motion, the core argument based on constructing a replicating portfolio remains the same.
 
 The classical model is analytically powerful precisely because it removes many market frictions: volatility is constant, liquidity is perfect, transaction costs are absent, and borrowing and lending occur at a single risk-free rate. For this paper, the last simplification is the most relevant. In practice, deposits and credit do not generate symmetric funding costs. This simple economic asymmetry has a strong effect on the pricing formula, since it breaks the linearity of the classical Black-Scholes equation.
 
-This asymmetry in discounting costs has motivated the \emph{total value} approach to derivatives pricing. One of the early contributions to nonlinear derivatives pricing is \cite{BurgardKjaer2011}, who showed that when a bank cannot borrow and deposit at the risk-free rate, linearity breaks down because the valuation adjustment depends recursively on the unknown price. They therefore extend the linear Black--Scholes equation by introducing a nonlinear funding term. Since many contracts can be viewed as insurance written against a broader portfolio of assets, we follow a similar modeling philosophy and generalize the framework to $d>1$ underlying assets.
+This asymmetry in discounting costs has motivated the \emph{total value} approach to derivatives pricing. One of the early contributions to nonlinear derivatives pricing is \cite{BurgardKjaer2011}, who showed that when a bank cannot borrow and deposit at the risk-free rate, linearity breaks down because the valuation adjustment depends recursively on the unknown price. They therefore extend the linear Black-Scholes equation by introducing a nonlinear funding term. Since many contracts can be viewed as insurance written against a broader portfolio of assets, we follow a similar modeling philosophy and generalize the framework to $d>1$ underlying assets.
 
 We are thus led to the nonlinear multi-asset pricing equation
 \begin{equation}
@@ -191,8 +195,8 @@ A prototypical specification is
 g(v) = a\,v^+ - b\,v^-, \qquad a,b \ge 0,
 \]
 which applies different effective discounting rates to positive and
-negative exposures. For example, a positive exposure (an asset) may be
-funded at a lower rate $a$, while a negative exposure (a liability) incurs
+negative exposures. For example, a positive exposure may be
+funded at a lower rate $a$, while a negative exposure incurs
 a higher funding cost $b$, reflecting real market conditions.
 
 We also consider an alternative model
@@ -200,24 +204,9 @@ We also consider an alternative model
 g(v) = a\,v^+ + b\,v^-, \qquad a,b \ge 0.
 \]
 
-Notice that in this model the positive branch has the same behavior as
-the previous one, but on the negative exposure branch it actually
-amplifies the rate. Mathematically speaking, this creates a
-non-dissipative behavior. Economically speaking, this can be interpreted
-as a benefit associated with holding liabilities. For example, one not
-only receives funding, which can be invested, but also effectively
-discounts the contract against its own default risk. In this sense, we
-adjust the price of the contract to reflect that negative exposures might
-generate effective benefits.
+Notice that in this model the positive branch behaves as in the previous case, but on the negative-exposure branch it actually amplifies the rate. Mathematically, this produces non-dissipative behavior. Economically, it can be interpreted as a benefit associated with holding liabilities. This behavior might be counterintuitive, but one should view it, not as a full on CVA/FVA adjustment, but rather as a stylized reduced-form specification introduced to explore the mathematical consequences of such asymmetry.
 
-The aim of this paper is to establish a rigorous analytical framework for these two nonlinear valuation problems. Due to the intrinsic difference in their respective behaviors, we separate the analysis of the
-dissipative and non-dissipative models. For both models jointly we
-establish well-posedness in weighted $L^2$ spaces and derive smoothing
-results under Lipschitz and piecewise-linear assumptions. For the
-dissipative core model $f_-(u)=a u^+ - b u^-$ we additionally establish
-comparison, contraction, and decay properties. The non-dissipative
-extension $f_+(u)=a u^+ + b u^-$ is treated separately using bounds
-adapted to the lack of monotonicity.
+The aim of this paper is to establish a rigorous analytical framework for these two nonlinear valuation problems. Because of the intrinsic difference in their respective behaviors, we analyze the dissipative and non-dissipative models separately. For both models, we establish well-posedness in weighted $L^2$ spaces and derive smoothing results under Lipschitz and piecewise-linear assumptions. For the dissipative core model $f_-(u)=a u^+ - b u^-$, we additionally establish comparison, contraction, and decay properties. The non-dissipative extension $f_+(u)=a u^+ + b u^-$ is treated separately using bounds adapted to the lack of monotonicity.
 
 \begin{remark}[Sign convention under time reversal]
 \label{rem:sign_convention}
@@ -230,18 +219,19 @@ reaction term of the form $+f(u)$ in the forward equation.
 
 \medskip
 \noindent\textbf{Main results.}
-The principal results of this paper are as follows.
+The main findings established for the model are as follows.
+
 \begin{enumerate}[label=(\roman*)]
 
-\item \emph{Global $L^2$ well-posedness}. Under the global Lipschitz condition, the equation has a unique global mild solution $\tilde u\in C([0,\infty);L^2(\mathbb{R}^d))$ with continuous dependence on the initial datum; see Theorem~\ref{thm:L2_global_wp}. For the pricing PDE, this means that the contract price depends continuously on the payoff.
+\item \emph{Global $L^2$ well-posedness}. Under the global Lipschitz condition, the equation has a unique global mild solution $\tilde u\in C([0,\infty);L^2(\mathbb{R}^d))$ with continuous dependence on the initial datum; for the pricing PDE, this means that the contract price depends continuously on the payoff. See Theorem~\ref{thm:L2_global_wp}.
 
 \item \emph{Parabolic smoothing and $H^1$ well-posedness}
 (Section~\ref{subsec:H1_instantaneous_regularization},
 Theorem~\ref{thm:H1_piecewise_wp}).
 For $L^2$ initial data, the solution exhibits instantaneous parabolic
 smoothing for all $\tau>0$, and for $H^1$ initial data it remains
-globally in $C([0,\infty);H^1(\mathbb{R}^d))$. This means that the
-pricing function becomes smooth immediately and remains well-behaved.
+globally in $C([0,\infty);H^1(\mathbb{R}^d))$. Thus, the
+pricing function becomes immediately regular and remains well behaved.
 
 \item \emph{Dissipative model: contraction and decay}
 (Section~\ref{sec:dissipative_model}).
@@ -266,7 +256,7 @@ Instead, we obtain the Gr\"onwall bound
 \|\tilde u(\tau)\|_{L^2}^2
 \le e^{2b\tau}\|\tilde u_0\|_{L^2}^2,
 \]
-together with an exponentially weighted Gagliardo--Nirenberg estimate.
+together with an exponentially weighted Gagliardo-Nirenberg estimate.
 After back-translation,
 \[
 \|V(t)\|_{L^2_\omega}\lesssim
@@ -279,20 +269,19 @@ so that decay occurs only when $r>b$.
 \medskip
 \noindent\textbf{Outline of the thesis.}
 In Section~\ref{sec:background} we recall the fundamental theory of the
-Black--Scholes framework. Then in Section~\ref{sec:nonlinear} we
-introduce the nonlinear models. In Section~\ref{sec:transform} we
-transform the pricing PDE to a semilinear heat equation. Subsequently,
-in Sections~\ref{sec:transform}, \ref{sec:dissipative_model}, and
-\ref{sec:plus_model}, we carry out the analysis. Finally, we transport
-the results back to the pricing PDE in
+Black-Scholes framework. Then, in Section~\ref{sec:nonlinear}, we
+introduce the nonlinear models. In Section~\ref{sec:transform}, we
+transform the pricing PDE into a semilinear heat equation. Subsequently,
+in Sections~\ref{sec:dissipative_model} and \ref{sec:plus_model}, we
+carry out the analysis. Finally, in Section~\ref{sec:nonlinear_bs_proofs},
+we transport the results back to the pricing PDE.
 Section~\ref{sec:nonlinear_bs_proofs}.
-\part*{Part I - Financial Model and Transformations}
-\addcontentsline{toc}{part}{Part I -- Financial Model and Transformations}
+
 
 \section{Financial and Mathematical Background}
 \label{sec:background}
 
-The most important question, in the world of financial derivatives is what is their "fair price". How do you go ahead about pricing the random ups and downs that financial assets have. To answer this question we recall the classical Black-Scholes theory, upon which we will later build our semi-linear multi-asset model. 
+One of the most important questions in the world of financial derivatives is how to determine their ``fair price.'' How should one price the random fluctuations of financial assets? To answer this question, we recall the classical Black-Scholes theory, on which we later build our semilinear multi-asset model. 
 
 \subsection{European options and the underlying price model}
 
@@ -391,7 +380,7 @@ Constructing a self-financing portfolio with position
 $\Delta = \nabla_S V$ eliminates all stochastic components
 simultaneously, provided the covariance matrix $Q$ is non-degenerate.
 Imposing the no-arbitrage condition then leads to the multi-asset
-Black--Scholes equation
+Black-Scholes equation
 \begin{equation}
 \label{eq:BS_multi}
 V_t
@@ -464,25 +453,24 @@ We do not pursue the classical linear theory further, since the main goal of the
 \label{sec:nonlinear}
 
 
-Nonlinear extensions of the Black-Scholes model have become more and more popular in the financial literature since they address some limitations and shortcomings of the standard model. For example the classical BS model fails to take into account several important factors which create friction in the real world. For example, the model assumes a universal risk free rate. This assumption fails to take into account differences in the rates between credits and deposits, as well as counterparty risk. We attempt to model these frictions by adding a nonlinear reaction term $-g(V)$ to the pricing PDE. This serves the purpose of encoding FVA and XVA adjustments. This is economically meaningful since it provides more realistic modelling of the market. We consider the nonlinearities of the form
+Nonlinear extensions of the Black-Scholes model have become increasingly common in the financial literature because they address several limitations and shortcomings of the standard model. For example, the classical Black-Scholes model fails to account for several important factors that generate market frictions. In particular, the model assumes a universal risk-free rate. This assumption does not capture differences between borrowing and lending rates, nor does it account for counterparty risk. We model these frictions by adding a nonlinear reaction term $-g(V)$ to the pricing PDE. We consider nonlinearities of the form
 \[
 g(v)=a\,v^+ \pm b\,v^-, \qquad a,b \ge 0,
 \]
 where $v^+=\max(v,0)$ and $v^-=\max(-v,0)$. 
 
-This structure reflects the asymmetry between positive and negative exposures. Lets first consider the 
+Let us first consider
+
 \[
 g(v)=a\,v^+ - b\,v^-, \qquad a,b \ge 0.
 \]
-This structure allows us to control the bid-ask spread between credit and deposit and provides a more realistic view of the financial reality. But also mathematically speaking these adjustments break the linearity of the pricing PDE, since they create recursive dependence since the desk must post or receive collateral in amounts dependent on the current mark-to-market value. From a mathematical perspective, the resulting equation is dissipative.
+This structure allows us to control the bid-ask spread between credit and deposit rates and provides a more realistic representation of financial markets. Mathematically, these adjustments break the linearity of the pricing PDE because they create recursive dependence: the desk must post or receive collateral in amounts that depend on the current mark-to-market value. From a mathematical perspective, the resulting equation is dissipative.
 
 Considering the second term
 \[
 g(v)=a\,v^+ + b\,v^-, \qquad a,b \ge 0.
 \]
-Notice that when we have positive exposure the model behaves exactly as the abovementioned dissipative model. But when we have negative exposure we see that the term is discounted less strongly. TThis means that it attempts to model funding benefit effects such as an institution's own counterparty risk.
-
-This structure can be understood as a reduced form of XVA and should be viewed as a stylized approximation rather than a full model of default. A complete XVA model would include default rates and exposure at default, which is out of the scope of the current work. Rather we look at it as an interesting mathematical case with some economic meaning.
+Notice that for positive exposure the model behaves exactly as the dissipative model discussed above. For negative exposure, however, the term is discounted less strongly. This means that the model attempts to capture funding-benefit effects such as an institution's own counterparty risk. This term should be viewed as a stylized approximation rather than as a full model of default. A complete XVA model would include default rates and exposure at default, which are beyond the scope of the present work. 
 
 \subsection{Market setting (classical part)}
 Let $S=(S_1,\dots,S_d)\in(0,\infty)^d$ denote the vector of underlying asset prices.
@@ -537,19 +525,30 @@ g \text{ is globally Lipschitz.}
 \end{equation}
 For the piecewise-linear models above, positive homogeneity of degree~$1$ is also used to make the transformed heat equation autonomous. 
 
+\begin{remark}
+The main difference between the two models is how they treat negative exposure. 
+In the dissipative case, $g_-(v) = a v^+ - b v^-$, negative values are penalized, 
+so the solution is pushed back toward zero. This reflects the idea that liabilities 
+become more costly due to funding. This can be interpreted as a stylized FVA/XVA-type adjustment. In the non-dissipative case, $g_+(v) = a v^+ + b v^-$, negative values are instead 
+amplified.
+
+\end{remark}
+
+
+
 \newpage
 
 \section{Transformations to a semilinear heat equation}
 \label{sec:transform}
 
-We reduce the nonlinear Black--Scholes equation~\eqref{eq:nonlinearBS}
+We reduce the nonlinear Black-Scholes equation~\eqref{eq:nonlinearBS}
 to a semilinear heat equation via four successive changes of variables,
 each detailed in a dedicated subsection below.
 \subsection{Time-to-maturity and discounting}
 \label{sec:discount}
 
-We set $\tau=T-t$, so we can tranform the backwards pricing problem into a forward parabolic equation. We also introduce a discounted unknown, which removes the zeroth-order discounting term $U(\tau,S)$. These are standard steps in
-the analysis of Black--Scholes-type equations; see, for example,
+We set $\tau=T-t$, thereby transforming the backward pricing problem into a forward parabolic equation. We also introduce a discounted unknown, which removes the zeroth-order discounting term $U(\tau,S)$. These are standard steps in
+the analysis of Black-Scholes-type equations; see, for example,
 \cite[Ch.~4]{WilmottHowisonDewynne1995}.
 
 Let $\tau=T-t$ (so $\tau\in(0,\infty)$) and define the discounted unknown
@@ -926,7 +925,7 @@ Thus
 
 \medskip
 \noindent\textbf{Step 3: second spatial derivatives.}
-Differentiating once more with respect to \(y_\ell\), we get
+Differentiating once more with respect to \(y_\ell\), we obtain
 \[
 u_{y_\ell y_k}(\tau,y)
 =
@@ -970,7 +969,7 @@ u_\tau(\tau,y)=\frac12\,\tr(QD_y^2u(\tau,y))-f(\tau,u(\tau,y)).
 Thus the transport term \(\beta\cdot\nabla w\) has been completely removed.
 
 \medskip
-\noindent\textbf{Interpretation.}
+\begin{remark}
 The substitution
 \[
 u(\tau,y)=w(\tau,y-\beta\tau)
@@ -980,8 +979,7 @@ corresponds to observing the solution in a frame moving with constant velocity \
 u_\tau=\frac12\,\tr(QD_y^2u)-f(\tau,u).
 \]
 This is the natural form to which one applies the final linear change of variables that reduces the diffusion matrix to the identity.
-
-
+\end{remark}
 
 \subsection{Reduction to the Laplacian}
 Since the assets can be correlated, the diffusion matrix $Q$, which contains
@@ -1143,8 +1141,7 @@ Section~\ref{sec:shared_theory}).
 
 We have thus reduced the original pricing problem \eqref{eq:nonlinearBS} to the Cauchy problem.
 
-\part*{Part II - Analysis of the Semilinear Problem}
-\addcontentsline{toc}{part}{Part II -- Analysis of the Semilinear Problem}
+
 
 \section{Semilinear Theory}
 \label{sec:shared_theory}
@@ -1238,7 +1235,6 @@ equivalently
 Therefore Young's convolution inequality gives
 \[
 \|S(\tau)\varphi\|_{L^q}
-=\|G_\tau*\varphi\|_{L^q}
 \le \|G_\tau\|_{L^r}\,\|\varphi\|_{L^p}
 \le C_{d,p,q}\,\tau^{-\frac d2(\frac1p-\frac1q)}\,\|\varphi\|_{L^p},
 \]
@@ -1256,7 +1252,6 @@ Hence the same scaling argument gives
 Applying Young's inequality once more,
 \[
 \|\nabla S(\tau)\varphi\|_{L^q}
-=\|(\nabla G_\tau)*\varphi\|_{L^q}
 \le \|\nabla G_\tau\|_{L^r}\,\|\varphi\|_{L^p}
 \le C_{d,p,q}\,\tau^{-\frac12-\frac d2(\frac1p-\frac1q)}\,\|\varphi\|_{L^p},
 \]
@@ -1283,7 +1278,7 @@ $\tilde u(\tau)\in H^1(\R^d)$ for every $\tau>0$;
 \item[(ii)] if one wants an $H^1$ energy identity starting exactly from $\tau=0$, then one must assume
 $\tilde u_0\in H^1(\R^d)$.
 \end{itemize}
-The point is that a mere mild $L^2$ solution only satisfies $\tilde u\in C([0,T];L^2)$, so the formal pairings
+The point is that a mild $L^2$ solution only satisfies $\tilde u\in C([0,T];L^2)$, so the formal pairings
 $\big(\partial_\tau \tilde u,\tilde u\big)_{L^2}$ and $\big(-\Delta \tilde u,\tilde u\big)_{L^2}$ are not a priori meaningful at
 $\tau=0$. On the other hand, the heat semigroup immediately improves regularity for every positive time.
 
@@ -1723,7 +1718,7 @@ and Cauchy's inequality gives
 This proves \eqref{eq:f_piecewise_H1_bound}.
 Likewise,
 \[
-f(u)-f(v)=a\,(u^+-v^+)-b\,(u^-v^-),
+f(u)-f(v)=a\,(u^+-v^+)-b\,(u^--v^-),
 \]
 and using again that the maps \(s\mapsto s^\pm\) are 1-Lipschitz on \(H^1\), with the same disjoint-support estimate applied to \(u-v\),
 we obtain \eqref{eq:f_piecewise_H1_Lip}.
@@ -2011,11 +2006,10 @@ convergence of the approximation scheme;
 see \cite[Ch.~7]{EvansPDE}.
 \end{comment}
 
-\begin{comment}
 \subsection{\texorpdfstring{$H^1$}{H1} regularization}
 \label{subsec:minus_H1_regularization}
 
-For the dissipative model, the shared smoothing theory already gives the desired estimate once one inserts the $L^2$ contraction \eqref{eq:L2_decay_general}. We therefore record only the resulting corollary.
+For the dissipative model, the smoothing theory already gives the desired estimate once one inserts the $L^2$ contraction \eqref{eq:L2_decay_general}. We therefore record only the resulting corollary.
 
 \begin{corollary}[Instantaneous \(H^1\) regularization for \texorpdfstring{$f_-$}{f-}]
 \label{cor:minus_H1_smoothing}
@@ -2037,16 +2031,13 @@ and
 \end{corollary}
 
 \begin{proof}
-Apply the shared estimate \eqref{eq:H1_smoothing_explicit} with $f=f_-$. Since \eqref{eq:L2_decay_general} gives
+Apply the estimate \eqref{eq:H1_smoothing_explicit} with $f=f_-$. Since \eqref{eq:L2_decay_general} gives
 \[
 \|\tilde u(s)\|_{L^2}\le \|\tilde u_0\|_{L^2}
 \qquad (s\ge 0),
 \]
 the function \(\varphi\) in \eqref{eq:H1_smoothing_explicit} may be taken to be identically \(1\).
 \end{proof}
-
-
-\end{comment}
 
 \subsection{A Gagliardo-Nirenberg estimate}
 \label{subsec:minus_GN}
@@ -2178,15 +2169,16 @@ Thus the piecewise-linear model enjoys the same Nash/Gagliardo-Nirenberg algebra
 
 
 
-% ----------
+% -----
 
 
 
 \clearpage
+
 \section{The non-dissipative model \texorpdfstring{$f_+(u)=a u^+ + b u^-$}{f+(u)=a u+ + b u-}}
 \label{sec:plus_model}
 
-We now turn to the non-dissipative extension model. The nonlinearity \(f_+\) has the same global Lipschitz and piecewise-linear regularity as \(f_-\), so the shared well-posedness and parabolic regularization theory continue to apply. What fails, however, is the sign-coercive structure underlying the dissipative model. In particular, one no longer expects \(L^2\)-contraction, comparison principles, or genuine decay estimates. The purpose of this section is therefore to identify precisely which conclusions survive in the absence of dissipativity, and to distinguish them from the stronger results available for \(f_-\).
+We now turn to the non-dissipative extension model. The nonlinearity \(f_+\) has the same global Lipschitz and piecewise-linear regularity as \(f_-\), so the well-posedness and parabolic regularization theory continue to apply. What fails, however, is the sign-coercive structure underlying the dissipative model. In particular, one no longer expects \(L^2\)-contraction, comparison principles, or genuine decay estimates. The purpose of this section is therefore to identify precisely which conclusions survive in the absence of dissipativity, and to distinguish them from the stronger results available for \(f_-\).
 
 We study the semilinear heat equation
 \begin{equation}
@@ -2262,7 +2254,7 @@ Let \(f_+\) be given by \eqref{eq:plus_nonlinearity}. Then:
 The identity \(f_+(0)=0\) is immediate. Since \(u\mapsto u^+\) and \(u\mapsto u^-\) are both 1-Lipschitz on \(\mathbb{R}\),
 \[
 |f_+(u)-f_+(v)|
-\le a\,|u^+-v^+| + b\,|u^-v^-|
+\le a\,|u^+-v^+| + b\,|u^--v^-|
 \le (a+b)|u-v|.
 \]
 More precisely, by considering separately the regions \(u,v\ge 0\), \(u,v\le 0\), and mixed signs, one obtains the sharper bound with \(L=\max(a,b)\). The linear-growth estimate follows from
@@ -2298,7 +2290,7 @@ Moreover, the data-to-solution map is Lipschitz continuous on bounded time inter
 By Lemma~\ref{lem:plus_basic_properties}, \(f_+\) is globally Lipschitz and satisfies \(f_+(0)=0\). Theorem~\ref{thm:L2_global_wp} therefore applies directly to \eqref{eq:plus_semilinear_heat}, yielding the stated global mild solution and Lipschitz dependence on the initial datum.
 \end{proof}
 
-\subsection{\texorpdfstring{$L^2$}{L2} a priori bound via Gr\"onwall}
+\subsection{\texorpdfstring{$L^2$}{L2} a priori bound via Gronwall}
 \label{subsec:plus_L2_bound}
 
 We next derive the correct \(L^2\) estimate for the non-dissipative model. Unlike the dissipative case, one does not obtain decay.
@@ -2381,7 +2373,7 @@ Taking \(L^2\)-norms and using the heat semigroup estimate
 \|\nabla S(t)\varphi\|_{L^2} \le C t^{-1/2}\|\varphi\|_{L^2}
 \qquad (t>0),
 \]
-together with the bound \eqref{eq:plus_L2_gronwall} we achieve from
+together with the bound \eqref{eq:plus_L2_gronwall}, we obtain
 \[
 \|f_+(u(s))\|_{L^2}\le L\|u(s)\|_{L^2}\le L e^{bs}\|u_0\|_{L^2},
 \]
@@ -2733,17 +2725,7 @@ e^{2b\tau}\,\|\tilde u_0\|_{L^1}^2\,\tau^{-d/2},
 }
 \label{eq:finance_piecewise_asymp}
 \end{equation}
-
-
-
 \end{proof}
-
-
-
-
-
-
-
 
 
 
@@ -2752,8 +2734,8 @@ e^{2b\tau}\,\|\tilde u_0\|_{L^1}^2\,\tau^{-d/2},
 \section{The nonlinear Black-Scholes: proofs of the main results}
 \label{sec:nonlinear_bs_proofs}
 
-The heat equation theory is now transported back to the original pricing
-variables.  We keep the notation of Section~\ref{sec:transform}.  Thus
+The heat-equation theory is now transported back to the original pricing
+variables. We keep the notation of Section~\ref{sec:transform}. Thus
 \[
     \tau=T-t,\qquad
     U(\tau,S):=e^{r\tau}V(T-\tau,S),
@@ -3076,7 +3058,7 @@ and both are globally Lipschitz. Theorem~\ref{thm:L2_global_wp} therefore gives 
 
 If \(\Phi\in H^1_{\omega,Q}\), then Lemma~\ref{lem:norm_equivalences_new} gives \(\tilde u_0\in H^1(\mathbb R^d)\). Theorem~\ref{thm:H1_piecewise_wp} applies to both piecewise-linear models, and Lemma~\ref{lem:transport_weighted_estimates}(ii) yields \(U\in C([0,T];H^1_{\omega,Q})\).
 
-If only \(\Phi\in L^2_\omega\), then the shared smoothing estimate \eqref{eq:H1_smoothing_explicit} applies with \(\varphi(s)\equiv 1\) in the dissipative case by \eqref{eq:L2_decay_general}, and with \(\varphi(s)=e^{bs}\) in the plus model by \eqref{eq:plus_L2_gronwall}. Lemma~\ref{lem:transport_weighted_estimates}(ii) then gives \eqref{eq:BS_H1_smoothing}.
+If only \(\Phi\in L^2_\omega\), then the smoothing estimate \eqref{eq:H1_smoothing_explicit} applies with \(\varphi(s)\equiv 1\) in the dissipative case by \eqref{eq:L2_decay_general}, and with \(\varphi(s)=e^{bs}\) in the plus model by \eqref{eq:plus_L2_gronwall}. Lemma~\ref{lem:transport_weighted_estimates}(ii) then gives \eqref{eq:BS_H1_smoothing}.
 \end{proof}
 
 \begin{proposition}[Energy identity]
@@ -3237,7 +3219,7 @@ With \(E_Q\) as in Lemma~\ref{lem:transport_weighted_estimates}, the heat-side G
 \le
 C_N\|\nabla_z\tilde u\|_{L^2}^2\|\tilde u\|_{L^1}^{4/d}
 \]
-and Lemma~\ref{lem:transport_weighted_estimates}(i)--(ii) give
+and Lemma~\ref{lem:transport_weighted_estimates}(i)-(ii) give
 \[
 \|U\|_{L^2_\omega}^{2+4/d}
 \le
@@ -3257,7 +3239,7 @@ and the induced heat-side nonlinearity is
 \[
     f_+(u)=a u^+ + b u^-.
 \]
-This model has the shared Lipschitz and piecewise-linear structure, but it
+This model has a Lipschitz and piecewise-linear structure, but it
 does not have the dissipative sign condition used in the preceding subsection.
 
 \begin{theorem}[Black-Scholes-side bounds for the non-dissipative model]
@@ -3481,8 +3463,9 @@ e^{(b-r)(T-t)},
 and the estimate allows growth as one moves backward from maturity. This does not mean that the solution necessarily blows up; rather, it means that the present argument no longer yields a decaying a priori bound in the weighted \(L^2\)-norm. In other words, the funding asymmetry may overcome the stabilizing effect of discounting at the level of this estimate.
 
 \medskip
-\medskip
-\noindent\textbf{Financial meaning.}
+\medskip\noindent
+
+\textbf{Financial meaning.}
 Unlike the dissipative model \(g_-\), the non-dissipative term \(g_+\) does
 not arise from a strict no-arbitrage replication argument, such as those
 developed by \cite{Piterbarg2010}, or from the bilateral XVA setting of
@@ -3491,7 +3474,7 @@ modification encoding the strength of an asymmetric correction applied to the
 negative exposure.
 
 The economic interpretation becomes more concrete when we separately examine
-the positive and negative branches of the term. On the positive side,
+the positive and negative branches. On the positive side,
 \(g_+(V)=aV^+\), the model behaves exactly like the dissipative model \(g_-\):
 positive receivables require financing, which reduces the present value. On
 the other hand, the negative exposure term \(g_+(V)=bV^-\) acts in the
@@ -3500,16 +3483,13 @@ exposures and drives \(V\) back toward zero, the term \(g_+(V)=bV^-\ge 0\)
 enters the pricing equation with sign \(-g_+(V)\le 0\), which drives \(V\)
 further negative rather than toward zero.
 
-As discussed above, this term should be interpreted not as a direct
-replication-based funding adjustment, but rather as a reduced-form
-credit-risk, regulatory, or stress-test correction. Mathematically, it tests
-which estimates survive when the sign of the negative branch is flipped. The
-effect of this sign flip is that the usual exponential decay driven by
-discounting at rate \(r\) is weakened to an effective rate \(r-b\). When
-\(b<r\), discounting still dominates and the estimate exhibits decay in the
-weighted \(L^2\)-norm. When \(b>r\), this decay is no longer guaranteed at
-the level of the estimate, although the solution itself remains globally
-bounded by Proposition~\ref{prop:plus_L2_gronwall}. Thus, the parameter \(b\)
+Mathematically, it tests which estimates survive when the sign of the negative
+branch is flipped. The effect of this sign flip is that the usual exponential
+decay driven by discounting at rate \(r\) is weakened to an effective rate
+\(r-b\). When \(b<r\), discounting still dominates and the estimate exhibits
+decay in the weighted \(L^2\)-norm. When \(b>r\), this decay is no longer
+guaranteed at the level of the estimate, although the solution itself remains
+globally bounded by Proposition~\ref{prop:plus_L2_gronwall}. Thus, the parameter \(b\)
 measures how strongly the negative-branch correction counteracts the influence
 of discounting.
 
@@ -3521,19 +3501,18 @@ correct interpretation is that diffusion still provides smoothing, but the
 negative branch of the nonlinearity introduces a competing growth mechanism.
 \end{remark}
 
-
 \newpage
 
 \section{Conclusion}
 \label{sec:conclusions}
 
 Motivated by frictions in modern financial markets, we analysed valuation
-adjustment models by extending the classical multi-asset Black--Scholes
+adjustment models by extending the classical multi-asset Black-Scholes
 framework with a semilinear adjustment term. After discounting, a logarithmic
 change of variables, a moving-frame transformation, and a whitening
-transformation, the Black--Scholes equation is converted into a semilinear
+transformation, the Black-Scholes equation is converted into a semilinear
 heat equation. This allows us to apply classical
-semilinear heat equation theory to study the behaviour of the transformed
+semilinear heat-equation theory to study the behavior of the transformed
 problem.
 
 Within this framework, we established global well-posedness, instantaneous
@@ -3546,8 +3525,8 @@ For the dissipative model
 \]
 we obtained weighted \(L^2\)-energy estimates, \(L^2\)-contraction,
 continuous dependence on the terminal payoff, weighted \(L^1\)-contraction,
-and Gagliardo--Nirenberg-type decay estimates after transporting the
-heat-side results back to the original Black--Scholes variables.
+and Gagliardo-Nirenberg-type decay estimates after transporting the
+heat-side results back to the original Black-Scholes variables.
 
 For the non-dissipative model
 \[
@@ -3555,7 +3534,7 @@ For the non-dissipative model
 \]
 the transported conclusions are the shared well-posedness and
 \(H^1\)-regularization results, the Gronwall \(L^2\)-bound, and the weighted
-Gagliardo--Nirenberg bound with an exponential factor. The dissipative
+Gagliardo-Nirenberg bound with an exponential factor. The dissipative
 conclusions proved for \(g_-\) rely on the sign structure
 \[
     f_-(u)u\ge0
@@ -3567,7 +3546,7 @@ contraction arguments. In contrast,
 \]
 is not sign-definite. For the non-dissipative term, we only obtain
 well-posedness, instantaneous regularization, and a priori bounds of
-Gronwall type, together with weighted Gagliardo--Nirenberg estimates
+Gronwall type, together with weighted Gagliardo-Nirenberg estimates
 involving an exponential growth factor.
 
 \paragraph{Future work}
@@ -3577,20 +3556,17 @@ maturity, and to Bermudan-style contracts, which can be exercised only at
 discrete dates. It would also be interesting to analyse how funding
 asymmetries affect the Greeks. On the numerical side, one could connect the
 present theory with its probabilistic counterpart through the nonlinear
-Feynman--Kac representation and the associated theory of backward stochastic
+Feynman-Kac representation and the associated theory of backward stochastic
 differential equations, as developed by \cite{PardouxPeng1990,PardouxPeng1992}.
 
 
 \newpage
-
 \appendix
+
 \section{Appendix}
-For readability, standard background material from linear algebra, Fourier analysis,
-and functional analysis has been collected in this appendix. The main text focuses
-on the nonlinear pricing model, its reduction to a semilinear heat equation, and the
-resulting deterministic PDE analysis. For the standard functional-analytic and PDE
-background recorded below, we refer in particular to Evans \cite{EvansPDE},
-Br\'ezis \cite{Brezis2011} and \cite{Trench2003}.
+We have gathered some standard material on the more important mathematical machinery we use in our analysis. For the standard functional analysis and PDE
+background recorded below, we refer in particular to Evans \cite{EvansPDE} and
+Br\'ezis \cite{Brezis2011}.
 
 
 
@@ -3693,8 +3669,9 @@ Let $(X,d)$ be a complete metric space, and let $T:X\to X$ satisfy
 d(Tx,Ty)\le k\,d(x,y)
 \qquad \text{for all } x,y\in X,
 \]
-for some constant $k\in[0,1)$. Then $T$ has a unique fixed point $x_*\in X$.
-Moreover, for every starting point $x_0\in X$, the iterates defined by
+for some constant $k\in[0,1)$. Then, there exists a unique element $x^\ast\in X$ such that
+$T(x^\ast)=x^\ast.$
+Moreover, for every starting point $x_0\in X$, the sequence defined by
 \[
 x_{n+1}=Tx_n,
 \qquad n\ge 0,
@@ -3702,53 +3679,7 @@ x_{n+1}=Tx_n,
 converge to $x_*$.
 \end{theorem}
 
-\begin{proof}
-Fix $x_0\in X$ and define the sequence $(x_n)$ by $x_{n+1}=Tx_n$.
-Since $T$ is a contraction,
-\[
-d(x_{n+1},x_n)=d(Tx_n,Tx_{n-1})\le k\,d(x_n,x_{n-1})
-\qquad \text{for } n\ge 1.
-\]
-By induction this gives
-\[
-d(x_{n+1},x_n)\le k^n d(x_1,x_0)
-\qquad \text{for all } n\ge 0.
-\]
 
-Now let $m>n$. By the triangle inequality,
-\[
-d(x_m,x_n)
-\le \sum_{j=n}^{m-1} d(x_{j+1},x_j)
-\le d(x_1,x_0)\sum_{j=n}^{m-1} k^j.
-\]
-Since $0\le k<1$, the geometric-series formula yields
-\[
-d(x_m,x_n)
-\le d(x_1,x_0)\,\frac{k^n-k^m}{1-k}
-\le \frac{k^n}{1-k}\,d(x_1,x_0).
-\]
-The right-hand side tends to $0$ as $n\to\infty$, uniformly in $m>n$, so
-$(x_n)$ is a Cauchy sequence. Because $X$ is complete, there exists
-$x_*\in X$ such that $x_n\to x_*$.
-
-It remains to show that $x_*$ is a fixed point. Using again that $T$ is a
-contraction,
-\[
-d(Tx_*,x_*)
-\le d(Tx_*,Tx_n)+d(Tx_n,x_*)
-\le k\,d(x_*,x_n)+d(x_{n+1},x_*).
-\]
-Letting $n\to\infty$ gives $d(Tx_*,x_*)=0$, hence $Tx_*=x_*$.
-
-To prove uniqueness, suppose $y_*\in X$ is another fixed point of $T$.
-Then
-\[
-d(x_*,y_*)=d(Tx_*,Ty_*)\le k\,d(x_*,y_*).
-\]
-Therefore $(1-k)d(x_*,y_*)\le 0$. Since $1-k>0$ and distances are
-nonnegative, it follows that $d(x_*,y_*)=0$, so $x_*=y_*$. Thus the fixed
-point is unique, and the iteration from any initial point converges to it.
-\end{proof}
 
 \begin{definition}[Dense Subset]
 Let $(X, d)$ be a metric space. A subset $A \subset X$ is said to be \emph{dense} in $X$ if for every
@@ -3938,13 +3869,13 @@ $C_c^\infty(\Omega)$ is dense in $L^p(\Omega)$ for every $1 \le p < \infty$.
 
 A standard proof combines truncation, approximation by continuous compactly supported functions, and mollification; see, for instance, Evans \cite{EvansPDE} or Br\'ezis \cite{Brezis2011}.
 
-\begin{comment}
+We will use, as main tool, the following result given in \cite{Gilardi2014}
 \begin{proposition}
 Let $u$ be a bounded function with compact support. If $u$ is Riemann
 integrable, then $u$ is also Lebesgue integrable, and its Riemann integral
 coincides with its Lebesgue integral.
 \end{proposition}
-\end{comment}
+
 
 
 \subsubsection{Sobolev Spaces \texorpdfstring{\(W^{k,p}\)}{Wk,p}}
@@ -4376,12 +4307,12 @@ H.~Fujita,
 \bibitem{PardouxPeng1990}
 E.~Pardoux and S.~Peng,
 \newblock Adapted solution of a backward stochastic differential equation,
-\newblock \emph{Systems \& Control Letters} 14(1) (1990), 55--61.
+\newblock \emph{Systems \& Control Letters} 14(1) (1990), 55-61.
 
 \bibitem{PardouxPeng1992}
 E.~Pardoux and S.~Peng,
 \newblock Backward stochastic differential equations and quasilinear parabolic partial differential equations,
-\newblock in B.~L.~Rozovskii and R.~B.~Sowers (eds.), \emph{Stochastic Partial Differential Equations and Their Applications}, Lecture Notes in Control and Information Sciences, vol.~176, Springer, 1992, pp.~200--217.
+\newblock in B.~L.~Rozovskii and R.~B.~Sowers (eds.), \emph{Stochastic Partial Differential Equations and Their Applications}, Lecture Notes in Control and Information Sciences, vol.~176, Springer, 1992, pp.~200-217.
 
 \bibitem{EvansPDE}
 L.~C.~Evans,
@@ -4416,7 +4347,7 @@ J.~L.~V\'azquez,
 
 \bibitem{Gagliardo1958}
 E.~Gagliardo,
-\newblock Proprieta di alcune classi di funzioni in piu variabili,
+\newblock Propriet\`a di alcune classi di funzioni in piu variabili,
 \newblock \emph{Ricerche di Matematica} 7 (1958), 102-137.
 
 \bibitem{Lions1969}
@@ -4458,18 +4389,18 @@ P.~Glasserman,
 
 \bibitem{BarlesSoner1998}
 G.~Barles and H.~M.~Soner,
-\newblock Option pricing with transaction costs and a nonlinear {Black--Scholes} equation,
-\newblock \emph{Finance and Stochastics} 2(4) (1998), 369--397.
+\newblock Option pricing with transaction costs and a nonlinear {Black-Scholes} equation,
+\newblock \emph{Finance and Stochastics} 2(4) (1998), 369-397.
 
 \bibitem{AvellanedaLevyParas1995}
 M.~Avellaneda, A.~Levy, and A.~Par\'as,
 \newblock Pricing and hedging derivative securities in markets with uncertain volatilities,
-\newblock \emph{Applied Mathematical Finance} 2(2) (1995), 73--88.
+\newblock \emph{Applied Mathematical Finance} 2(2) (1995), 73-88.
 
 \bibitem{AnkudinovaEhrhardt2008}
 J.~Ankudinova and M.~Ehrhardt,
-\newblock On the numerical solution of nonlinear {Black--Scholes} equations,
-\newblock \emph{Computers \& Mathematics with Applications} 56(3) (2008), 799--812.
+\newblock On the numerical solution of nonlinear {Black-Scholes} equations,
+\newblock \emph{Computers \& Mathematics with Applications} 56(3) (2008), 799-812.
 
 \end{thebibliography}
 
